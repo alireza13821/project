@@ -3,180 +3,254 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using project1.Data;
 using project1.Models;
+using project1.Helpers;
 using System.Diagnostics;
 using System.Security.Claims;
 
 namespace project1.Controllers
 {
+    [Authorize(Policy = "User")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private MyDBContext _dbContext;
+        private readonly MyDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger, MyDBContext Context)
+        public HomeController(ILogger<HomeController> logger, MyDbContext context)
         {
             _logger = logger;
-            _dbContext = Context;
+            _context = context;
         }
 
+        // =========================
+        // صفحه اصلی
+        // =========================
+        [AllowAnonymous]
         public IActionResult Index()
         {
-            var allBooks = _dbContext.Books.ToList();
-            return View(allBooks);
-        }
-
-        [Authorize(Roles = "User")]
-        public IActionResult AddToReserve(int bookId, bool remove = false)
-        {
-            var book = _dbContext.Books.Find(bookId);
-            if (book == null || book.Quantity <= 0)  
-            {
-                return RedirectToAction("Index");
-            }
-
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier).ToString());
-
-            var barrow = _dbContext.Reserves
-                .Include(r => r.ReserveItems)
-                .SingleOrDefault(o => o.UserId == userId && !o.IsFinaly);
-
-            if (remove)
-            {
-                if (barrow != null)
-                {
-                    var itemToRemove = barrow.ReserveItems.SingleOrDefault(ri => ri.BookId == bookId);
-                    if (itemToRemove != null)
-                    {
-                        _dbContext.ReserveItems.Remove(itemToRemove);
-                        _dbContext.SaveChanges();
-                    }
-                }
-            }
-            else
-            {
-                if (barrow != null)
-                {
-                    var barrowDetail = barrow.ReserveItems.SingleOrDefault(d => d.BookId == bookId);
-                    if (barrowDetail != null)
-                    {
-                        return RedirectToAction("MyBarrow");
-                    }
-                    else
-                    {
-                        var newReserveItem = new ReserveItem
-                        {
-                            BookId = bookId,
-                            ReserveId = barrow.Id
-                        };
-                        _dbContext.ReserveItems.Add(newReserveItem);
-                    }
-                }
-                else
-                {
-                    var newReserve = new Reserve
-                    {
-                        UserId = userId,
-                        CreateDate = DateTime.Now,
-                        IsFinaly = false,
-                        Status="ثبت نشده",
-                        ReserveItems = new List<ReserveItem>
-                        {
-                            new ReserveItem
-                            {
-                                BookId = bookId
-                            }
-                        }
-                    };
-
-                    _dbContext.Reserves.Add(newReserve);
-                }
-            }
-
-            _dbContext.SaveChanges();
-            return RedirectToAction("MyBarrow");
-        }
-
-
-        [Authorize(Roles = "User")]
-        public IActionResult MyBarrow()
-        {
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier).ToString());
-
-
-            var reserve = _dbContext.Reserves
-                .Where(o => o.UserId == userId && !o.IsFinaly)
-                .Include(r => r.ReserveItems)
-                .ThenInclude(ri => ri.book)
-                .SingleOrDefault();
-
-            if (reserve == null)
-            {
-                return View(new Reserve { ReserveItems = new List<ReserveItem>() });
-            }
-
-            return View(reserve);
-        }
-
-
-        [Authorize(Roles = "User")]
-        public IActionResult FinalizeReserve()
-        {
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier).ToString());
-
-
-            var reserve = _dbContext.Reserves
-                .Where(o => o.UserId == userId && !o.IsFinaly && !o.IsApproved)
-                .Include(r => r.ReserveItems)
-                .SingleOrDefault();
-
-            if (reserve != null)
-            {
-
-                reserve.IsFinaly = true;
-                reserve.IsApproved = false;
-                reserve.Status = "در حال بررسی";
-                _dbContext.SaveChanges();
-            }
-
-
-            return RedirectToAction("ApprovalMessage");
-        }
-
-        [Authorize(Roles = "User")]
-
-
-
-        [Authorize(Roles = "User")]
-        public IActionResult ApprovalMessage()
-        {
-            ViewBag.Message = "درخواست شما با موفقیت ارسال شد و در انتظار تأیید است";
-            return View();
-        }
-        
-        [Authorize(Roles = "User")]
-        public IActionResult PreviousReserves()
-        {
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier).ToString());
-
-
-            var previousReserves = _dbContext.Reserves
-                .Include(r => r.ReserveItems)
-                .ThenInclude(ri => ri.book)
-                .Where(r => r.UserId == userId && r.IsFinaly)
+            var books = _context.Books
+                .Include(b => b.Reserves)
+                .Where(b => b.IsActive)
                 .ToList();
 
-            return View(previousReserves);
+            return View(books);
         }
 
-        public IActionResult Privacy()
+        // =========================
+        // جستجو (عمومی)
+        // =========================
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Search(string q)
         {
-            return View();
+            if (string.IsNullOrWhiteSpace(q))
+                return View(new List<Book>());
+
+            var results = _context.Books
+                .Where(b =>
+                    b.IsActive &&
+                    (b.Name.Contains(q) ||
+                     b.Author.Contains(q) ||
+                     b.Description!.Contains(q)))
+                .ToList();
+
+            return View(results);
+        }
+
+        // =========================
+        // افزودن به سبد امانت
+        // =========================
+        [HttpPost]
+        public IActionResult AddToBorrow(int bookId)
+        {
+            var cart = HttpContext.Session.GetObject<List<int>>("BorrowCart")
+                       ?? new List<int>();
+
+            if (!cart.Contains(bookId))
+                cart.Add(bookId);
+
+            HttpContext.Session.SetObject("BorrowCart", cart);
+
+            return RedirectToAction("Borrows");
+        }
+
+        // =========================
+        // صفحه امانت‌ها
+        // =========================
+        public IActionResult Borrows()
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var cart = HttpContext.Session.GetObject<List<int>>("BorrowCart")
+                       ?? new List<int>();
+
+            var selectedBooks = _context.Books
+                .Where(b => cart.Contains(b.Id))
+                .ToList();
+
+            var activeBorrows = _context.Borrows
+                .Include(b => b.Book)
+                .Where(b => b.UserId == userId && !b.IsReturned)
+                .ToList();
+
+            ViewBag.ActiveBorrows = activeBorrows;
+
+            return View(selectedBooks);
+        }
+
+        // =========================
+        // ثبت نهایی امانت
+        // =========================
+        [HttpPost]
+        public IActionResult ConfirmBorrows()
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var user = _context.Users.Find(userId);
+
+            var cart = HttpContext.Session.GetObject<List<int>>("BorrowCart");
+            if (cart == null || !cart.Any())
+                return RedirectToAction("Borrows");
+
+            int days = user != null && user.IsPremium ? 30 : 14;
+
+            foreach (var bookId in cart)
+            {
+                var book = _context.Books.Find(bookId);
+                if (book == null || book.AvailableQuantity < 1)
+                    continue;
+
+                _context.Borrows.Add(new Borrow
+                {
+                    UserId = userId,
+                    BookId = bookId,
+                    BorrowDate = DateTime.Now,
+                    DueDate = DateTime.Now.AddDays(days),
+                    RenewedCount = 0,
+                    IsReturned = false
+                });
+
+                book.AvailableQuantity--;
+
+                // فعال‌سازی نوبت رزرو بعدی
+                var nextReserve = _context.Reserves
+                    .Where(r => r.BookId == book.Id && r.IsActive)
+                    .OrderBy(r => r.ReservationDate)
+                    .FirstOrDefault();
+
+                if (nextReserve != null)
+                    nextReserve.ExpireDate = DateTime.Now.AddDays(5);
+            }
+
+            _context.SaveChanges();
+            HttpContext.Session.Remove("BorrowCart");
+
+            return RedirectToAction("Borrows");
+        }
+
+        // =========================
+        // تمدید امانت
+        // =========================
+        public IActionResult RenewBorrow(int id)
+        {
+            var borrow = _context.Borrows
+                .FirstOrDefault(b => b.Id == id && !b.IsReturned);
+
+            if (borrow == null || borrow.RenewedCount >= 2)
+                return RedirectToAction("Borrows");
+
+            borrow.DueDate = borrow.DueDate.AddDays(7);
+            borrow.RenewedCount++;
+
+            _context.SaveChanges();
+            return RedirectToAction("Borrows");
+        }
+
+        // =========================
+        // افزودن به رزرو
+        // =========================
+        [HttpPost]
+        public IActionResult AddToReserve(int bookId)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var book = _context.Books
+                .Include(b => b.Reserves)
+                .FirstOrDefault(b => b.Id == bookId && b.Type == BookType.Borrow);
+
+            if (book == null)
+                return NotFound();
+
+            if (book.Reserves.Count(r => r.IsActive) >= 2)
+                return BadRequest("ظرفیت رزرو تکمیل شده");
+
+            bool alreadyReserved = _context.Reserves
+                .Any(r => r.BookId == bookId && r.UserId == userId && r.IsActive);
+
+            if (alreadyReserved)
+                return RedirectToAction("Reserves");
+
+            _context.Reserves.Add(new Reserve
+            {
+                UserId = userId,
+                BookId = bookId,
+                ReservationDate = DateTime.Now,
+                ExpireDate = DateTime.Now.AddDays(5),
+                IsActive = true
+            });
+
+            _context.SaveChanges();
+            return RedirectToAction("Reserves");
+        }
+
+        // =========================
+        // صفحه رزروها
+        // =========================
+        public IActionResult Reserves()
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            AutoCancelExpiredReserves();
+
+            var reserves = _context.Reserves
+                .Include(r => r.Book)
+                .Where(r => r.UserId == userId && r.IsActive)
+                .OrderBy(r => r.ReservationDate)
+                .ToList();
+
+            return View(reserves);
+        }
+
+        public IActionResult CancelReserve(int id)
+        {
+            var reserve = _context.Reserves.Find(id);
+            if (reserve == null)
+                return NotFound();
+
+            reserve.IsActive = false;
+            _context.SaveChanges();
+
+            return RedirectToAction("Reserves");
+        }
+
+        private void AutoCancelExpiredReserves()
+        {
+            var expired = _context.Reserves
+                .Where(r => r.IsActive && r.ExpireDate < DateTime.Now)
+                .ToList();
+
+            foreach (var r in expired)
+                r.IsActive = false;
+
+            _context.SaveChanges();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            });
         }
     }
 }
+

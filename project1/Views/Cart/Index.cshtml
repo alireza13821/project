@@ -1,0 +1,60 @@
+﻿@model Order
+
+<h2 class="mb-4">🛒 سبد خرید</h2>
+
+@if (Model == null || Model.OrderItems == null || !Model.OrderItems.Any())
+{
+    <p>سبد خرید شما خالی است.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>عکس</th>
+                <th>کتاب</th>
+                <th>تعداد</th>
+                <th>قیمت</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.OrderItems)
+            {
+                <tr>
+                    <td>
+                        <img src="/img/@(item.Book.Id).jpg"
+                             style="width:60px;height:90px;object-fit:cover" />
+                    </td>
+                    <td>@item.Book.Name</td>
+                    <td>@item.Quantity</td>
+                    <td>@(item.Quantity* item.Price) تومان</td>
+                    <td>
+                        <a asp-action="RemoveItem"
+                           asp-route-itemId="@item.Id"
+                           class="btn btn-danger btn-sm">
+                            حذف
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>
+        جمع کل:
+        @Model.OrderItems.Sum(i => i.Quantity * i.Price) تومان
+    </h4>
+
+    @if (User.IsInRole("User") && ViewBag.IsPremium == true)
+    {
+        <span class="badge bg-success">🎉 ۲۰٪ تخفیف اشتراک ویژه اعمال شده</span>
+    }
+
+
+    <form asp-action="Checkout" method="post">
+        <button class="btn btn-success">
+            تأیید نهایی خرید
+        </button>
+    </form>
+}

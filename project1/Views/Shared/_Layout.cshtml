@@ -11,47 +11,148 @@
 </head>
 <body style= "font-family: Sahel">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <!-- clock start-->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 ml-2 mr-2 position-relative">
+            <div id="tehranClock" style="
+                position: absolute;
+                left: 0;
+                top: 50%;
+                transform: translateY(-50%);
+                font-family: 'Courier New', monospace;
+                font-weight: bold;
+                font-size: 0.9rem;
+                color: white ;
+                /*#00ff99;*/
+                padding: 4px 10px;
+            "></div>
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">project1</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        @if (User.Identity.IsAuthenticated)
+                <a class="navbar-brand ms-3" asp-area="" asp-controller="Home" asp-action="Index">کتابخانه آبی</a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        @if (User.Identity!.IsAuthenticated)
                         {
-                           <li class="nav-item pull-right">
-                                <a class="nav-link text-dark" >@User.Identity.Name خوش آمدید !</a>
-                           </li>
-                           <li class="nav-item pull-right">
-                             <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">خروج</a>
-                           </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                                    @User.Identity.Name  عزیز خوش آمدید !
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" asp-controller="Profile" asp-action="Index">پروفایل</a></li>
+
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="Users" asp-action="Index">مدیریت کاربران</a></li>
+                                    
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Index">
+                                                مدیریت کتاب‌ها
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="FinancialReport">
+                                                گزارشات مالی
+                                            </a>
+                                        </li>
+    
+                                    }
+                                    @if (User.IsInRole("User"))
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="Profile" asp-action="MyOrders">تاریخچه خریدها</a></li>
+                                    }
+                                    <li><hr /></li>
+                                    <li><a class="dropdown-item text-danger" asp-area="" asp-controller="Account" asp-action="Logout">خروج</a></li>
+                                </ul>
+                            </li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Chat" asp-action="ChatWithLibrarian">
+                                        💬 چت با کتابدار
+                                    </a>
+                                </li>
+                            }
+
+                            @if (User.IsInRole("Librarian"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Chat" asp-action="Inbox">
+                                        💬 پیام‌ها
+                                    </a>
+                                </li>
+                            }
+
+                            @if (User.IsInRole("User"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Chat" asp-action="ChatWithLibrarian">
+                                        💬 چت با کتابدار
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Cart" asp-action="Index">سبد خرید</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Home" asp-action="Borrows">امانات</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Users" asp-action="Subscription">اشتراک</a>
+                                </li>
+                            }
                         }
                         else
                         {
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">ورود</a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link " asp-area="" asp-controller="Account" asp-action="Login">ورود کاربر</a>
+                            </li>
                         }
+
                     </ul>
+                    <form asp-action="Search" asp-controller="Home" method="get" class="d-flex">
+                        <input name="q"
+                               class="form-control me-2"
+                               type="search"
+                               placeholder="جستجوی کتاب..."
+                               autocomplete="off" />
+                        <button class="btn btn-outline-light" type="submit">
+                            🔍
+                        </button>
+                    </form>
                 </div>
+               
             </div>
         </nav>
+
+        <script>
+            function updateTehranClock() {
+                const now = new Date();
+                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+                const tehranTime = new Date(utc + (3.5 * 60 * 60 * 1000));
+
+                const days = ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه"];
+                const dayName = days[tehranTime.getDay()];
+
+                const options = {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                    hour12: false
+                };
+                const formatted = `${dayName} ${tehranTime.toLocaleString('fa-IR', options)}`;
+
+                document.getElementById('tehranClock').innerText = formatted;
+            }
+            setInterval(updateTehranClock, 1000);
+            updateTehranClock();
+        </script>
+        <!-- clock end-->
     </header>
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
-
     <!--<footer class="border-top footer text-muted">
         <div class="container">
             &copy; 1403 - project1 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>

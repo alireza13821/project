@@ -1,0 +1,35 @@
+﻿@{
+    ViewData["Title"] = "Welcome";
+}
+
+<div class="text-center">
+    <h1 class="display-5">کاربر گرامی با موفقیت ثبت نام شدید!</h1>
+</div>
+
+<div class="text-center mb-2">
+    <h5 class="display-5">کاربر گرامی لطفا وارد شوید</h5>
+</div>
+<div class="text-center mb-4">
+    <a asp-controller="Account" asp-action="Login" class="btn btn-green">ورود</a>
+</div>
+<style>
+    .btn-green {
+        background-color: #28a745;
+        color: white;
+        padding: 10px 25px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+        .btn-green:hover {
+            background-color: #218838;
+            color: white;
+        }
+</style>
+
+<div class="text-center">
+    <a asp-controller="Home" asp-action="Index" class="btn btn-warning">بازگشت به صفحه اصلی</a>
+</div>
+
+

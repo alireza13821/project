@@ -1,0 +1,44 @@
+﻿@model List<User>
+
+<h2>جستجوی کاربران</h2>
+
+<form asp-action="SearchUser" method="get" class="mb-3">
+    <input type="text"
+           name="search"
+           class="form-control"
+           placeholder="نام یا ایمیل کاربر را وارد کنید..." />
+</form>
+
+@if (Model != null && Model.Any())
+{
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>نام</th>
+                    <th>ایمیل</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var user in Model)
+            {
+                    <tr>
+                        <td>@user.Name</td>
+                        <td>@user.Email</td>
+                        <td>
+                            <a asp-controller="Account"
+                       asp-action="EditUser"
+                       asp-route-id="@user.Id"
+                       class="btn btn-sm btn-primary">
+                                ویرایش
+                            </a>
+                        </td>
+                    </tr>
+            }
+            </tbody>
+        </table>
+}
+else
+{
+        <p class="text-muted">کاربری یافت نشد</p>
+}

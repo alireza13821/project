@@ -1,0 +1,53 @@
+﻿@model List<Order>
+
+<h2 class="text-center mb-4">📦 تاریخچه خریدهای من</h2>
+
+@if (!Model.Any())
+{
+    <p>تاکنون خریدی ثبت نکرده‌اید.</p>
+}
+else
+{
+    @foreach (var order in Model)
+    {
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light">
+                <strong>تاریخ خرید:</strong> @order.OrderDate.ToString("yyyy/MM/dd")
+                <span class="float-end">
+                    <strong>مبلغ:</strong>
+                    @order.OrderItems.Sum(i => i.Quantity * i.Price) تومان
+                </span>
+            </div>
+
+            <div class="card-body">
+                <table class="table">
+
+                    <thead>
+                        <tr>
+@*                            <th>عکس</th>
+*@                                     <th></th>
+                            <th>کتاب</th>
+                            <th>تعداد</th>
+                            <th>قیمت</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in order.OrderItems)
+                        {
+                            <tr>
+                                <td>
+                                    <img src="/img/@(item.Book.Id).jpg"
+                             style="width:50px;height:75px;object-fit:cover" />
+
+                                </td>
+                                <td>@item.Book.Name</td>
+                                <td>@item.Quantity</td>
+                                <td>@(item.Quantity * item.Price) تومان</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}

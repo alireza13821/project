@@ -5,7 +5,6 @@
         public int Id { get; set; }
         public DateTime CreateDate { get; set; }
         public string FullName { get; set; }
-        public List<ReserveItem> ReserveItems { get; set; }
         public string Status { get; set; }
     }
 }

@@ -1,0 +1,32 @@
+﻿@model List<Book>
+
+<h3>نتایج جستجو</h3>
+
+@if (!Model.Any())
+{
+        <p>نتیجه‌ای یافت نشد.</p>
+}
+else
+{
+        <div class="row">
+        @foreach (var book in Model)
+        {
+                    <div class="col-md-3 mb-3">
+                        <div class="card">
+                            <img src="/img/@(book.Id).jpg" class="card-img-top" />
+                            <div class="card-body">
+                                <h5>@book.Name</h5>
+                                <p>@book.Author</p>
+                        @if (book.Type.ToString() == "Sale")
+                        {
+                            <p>فروشی</p>
+                        }
+                        else{
+                        <p>امانتی</p>
+                        }
+                    </div>
+                        </div>
+                    </div>
+        }
+        </div>
+}

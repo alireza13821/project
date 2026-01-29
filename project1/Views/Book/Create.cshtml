@@ -1,0 +1,47 @@
+﻿@* @model project1.Models.Book
+@{
+    ViewData["Title"] = "افزودن کتاب جدید";
+}
+
+<h2>📘 افزودن کتاب جدید</h2>
+
+<form asp-action="Create" asp-controller="Books" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        <label>نام کتاب</label>
+        <input class="form-control" asp-for="Name" placeholder="نام کتاب را وارد کنید" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>توضیحات</label>
+        <textarea class="form-control" asp-for="Description" placeholder="توضیحات کتاب"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>تعداد موجودی</label>
+        <input class="form-control" asp-for="TotalQuantity" type="number" placeholder="مثلاً 5" />
+        <span asp-validation-for="TotalQuantity" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>آدرس تصویر</label>
+        <input class="form-control" asp-for="ImagePath" placeholder="مثلاً /images/book.jpg" />
+        <span asp-validation-for="ImagePath" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>نوع کتاب</label>
+        <input class="form-control" asp-for="Type" placeholder="مثلاً علمی، رمان، آموزشی..." />
+        <span asp-validation-for="Type" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success mt-3">ثبت کتاب</button>
+    <a class="btn btn-secondary mt-3" asp-action="Index">بازگشت</a>
+</form>
+
+@section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+} *@

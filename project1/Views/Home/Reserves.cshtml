@@ -1,0 +1,34 @@
+﻿@model List<Reserve>
+
+<h2>📌 رزروهای فعال من</h2>
+
+@if (!Model.Any())
+{
+        <p>رزروی ندارید.</p>
+}
+else
+{
+        <table class="table">
+            <tr>
+                <th>کتاب</th>
+                <th>تاریخ رزرو</th>
+                <th>انقضا</th>
+                <th>عملیات</th>
+            </tr>
+        @foreach (var r in Model)
+        {
+                    <tr>
+                        <td>@r.Book.Name</td>
+                        <td>@r.ReservationDate.ToString("yyyy/MM/dd")</td>
+                        <td>@r.ExpireDate.ToString("yyyy/MM/dd")</td>
+                        <td>
+                            <a asp-action="CancelReserve"
+                       asp-route-id="@r.Id"
+                       class="btn btn-danger btn-sm">
+                                لغو
+                            </a>
+                        </td>
+                    </tr>
+        }
+        </table>
+}

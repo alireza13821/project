@@ -1,0 +1,157 @@
+﻿@model project1.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #fafafa, #e3f2fd); 
+    }
+
+    h1, h4 {
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); 
+    }
+
+    h1 {
+        color: #1e88e5; 
+        font-size: 2.5rem;
+    }
+
+    h4 {
+        color: #3949ab;
+    }
+
+    .card {
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); 
+    }
+
+    label {
+        color: #1a237e; 
+    }
+
+    input {
+        background-color: #f1f8e9; 
+        border: 2px solid #81c784; 
+        border-radius: 5px;
+        padding: 10px;
+        transition: all 0.3s ease; 
+    }
+
+    input:focus {
+        border-color: #388e3c; 
+        box-shadow: 0 0 5px rgba(56, 142, 60, 0.5); 
+    }
+
+    .btn-primary {
+        background-color: #1e88e5;
+        border-color: #1e88e5;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #0d47a1; 
+        transform: scale(1.05); 
+    }
+
+    .btn-outline-secondary {
+        color: #1a237e;
+        border-color: #1a237e;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #3949ab;
+        border-color: #3949ab;
+    }
+
+    a {
+        color: #1e88e5;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    a:hover {
+        color: #0d47a1; 
+    }
+</style>
+
+<div class="container mt-5">
+    <h4 class="text-center mb-3">به صفحه ثبت نام خوش آمدید</h4>
+    <hr class="mb-5" />
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg p-4 border-0">
+                <form asp-action="Register" class="needs-validation" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- Name Field -->
+                    <div class="text-center mb-3">
+                        <label asp-for="Name" class="form-label fw-bold">نام</label>
+                        <input asp-for="Name" class="form-control" placeholder="نام" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                  
+                    <!-- Email Field -->
+                    <div class="text-center mb-3">
+                        <label asp-for="Email" class="form-label fw-bold">ایمیل</label>
+                        <input asp-for="Email" class="form-control" type="email" placeholder="ایمیل" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="text-center mb-3">
+                        <label asp-for="Password" class="form-label fw-bold">رمز عبور</label>
+                        <input asp-for="Password" class="form-control" placeholder="رمز عبور" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="text-center mb-3">
+                        <label asp-for="Repassword" class="form-label fw-bold">تکرار رمز عبور</label>
+                        <input asp-for="Repassword" class="form-control" placeholder="تکرار رمز عبور" />
+                        <span asp-validation-for="Repassword" class="text-danger"></span>
+                    </div>
+
+                    <div class="text-center mb-3">
+                        <label asp-for="Phone" class="form-label fw-bold">شماره تلفن همراه</label>
+                        <input asp-for="Phone" class="form-control" placeholder="شماره همراه" />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center mt-2">
+                        <input type="submit" value="ثبت نام" class="btn btn-primary btn-lg px-5 mb-4" />
+                    </div>
+                    <div class="text-center mt-2">
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-lg px-5">
+                            بازگشت به صفحه اصلی</a>
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })();
+    </script>
+}

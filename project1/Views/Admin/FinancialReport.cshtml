@@ -1,0 +1,111 @@
+﻿@model project1.Models.FinancialReportViewModel
+
+@{
+    ViewData["Title"] = "گزارش مالی";
+}
+
+<h2 class="text-center">📊 گزارش مالی سیستم</h2>
+
+<hr />
+
+<h3>💰 خلاصه مالی</h3>
+<ul>
+    <li>مجموع فروش کتاب‌ها: <strong>@Model.TotalBookSales</strong> تومان</li>
+    <li>مجموع فروش اشتراک‌ها: <strong>@Model.TotalSubscriptionSales</strong> تومان</li>
+    <li>جریمه‌های پرداخت‌شده: <strong>@Model.TotalPaidFines</strong> تومان</li>
+    <li>جریمه‌های پرداخت‌نشده: <strong>@Model.TotalUnpaidFines</strong> تومان</li>
+</ul>
+
+<hr />
+
+<h3 class="text-center">📚 خرید کتاب‌ها</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>کاربر</th>
+            <th>تاریخ</th>
+            <th>مبلغ</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model.BookOrders)
+        {
+            <tr>
+                <td>@order.User.Name</td>
+                <td>@order.OrderDate.ToShortDateString()</td>
+                <td>@order.TotalPrice</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+
+<h3 class="text-center">💳 اشتراک‌ها</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>کاربر</th>
+            <th>شروع</th>
+            <th>پایان</th>
+            <th>مبلغ</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var sub in Model.Subscriptions)
+        {
+            <tr>
+                <td>@sub.User.Name</td>
+                <td>@sub.StartDate.ToShortDateString()</td>
+                <td>@sub.EndDate.ToShortDateString()</td>
+                <td>@sub.Price</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+
+<h3 class="text-center">⚠️ جریمه‌های پرداخت‌نشده</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>کاربر</th>
+            <th>مبلغ</th>
+            <th>روز تأخیر</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var fine in Model.UnpaidFines)
+        {
+            <tr>
+                <td>@fine.User.Name</td>
+                <td>@fine.Amount</td>
+                <td>@fine.DaysLate</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+
+<h3 class="text-center">✅ جریمه‌های پرداخت‌شده</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>کاربر</th>
+            <th>مبلغ</th>
+            <th>تاریخ</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var fine in Model.PaidFines)
+        {
+            <tr>
+                <td>@fine.User.Name</td>
+                <td>@fine.Amount</td>
+                <td>@fine.CreatedAt.ToShortDateString()</td>
+            </tr>
+        }
+    </tbody>
+</table>

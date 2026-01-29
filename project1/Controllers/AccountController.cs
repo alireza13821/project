@@ -1,109 +1,147 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using project1.Data;
 using project1.Models;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 
 namespace project1.Controllers
 {
     public class AccountController : Controller
     {
-        private MyDBContext _dbContext;
-        public AccountController(MyDBContext context)
+        private readonly MyDbContext _dbcontext;
+
+        public AccountController(MyDbContext context)
         {
-
-            _dbContext = context;
-
+            _dbcontext = context;
         }
 
-        public IActionResult AddUser()
+        // Register
+        public IActionResult Register()
         {
-            return View(new AddUserViewModel());
+            return View();
         }
         [HttpPost]
-        public IActionResult AddUser(AddUserViewModel model)
+        public IActionResult Register(RegisterViewModel register)
         {
-            if (_dbContext.Users.Any(c => c.Email==model.Email.ToLower()))
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("Email", "ایمیل تکراری است");
-                return View(model);
+                return View(register);
             }
+            User user = new User();
+            user.Name = register.Name;
+            user.Email = register.Email!.ToLower();
+            user.Password = register.Password!;
+            user.RegisterDate = DateTime.Now;
+            user.Phone = register.Phone;
+            user.Role = "User";
 
-            if (ModelState.IsValid)
-            {
-
-                using (var transaction = _dbContext.Database.BeginTransaction())
-                {
-                    try
-                    {
-
-                        _dbContext.Users.Add(new User
-                        {
-                            
-                            Name = model.Name,
-                            LastName = model.LastName,
-                            Email = model.Email,
-                            Password = model.Password,
-                            Role="User"
-                        });
-
-                        _dbContext.SaveChanges();
-                        transaction.Commit();
-
-                        return RedirectToAction("confirmedMessage");
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        return Content($"خطا در ثبت کاربر : {ex.Message}");
-                    }
-                }
-
-            }
-
-            return View(model);
+            _dbcontext.Users.Add(user);
+            _dbcontext.SaveChanges();
+            return RedirectToAction("Welcome");
         }
 
-        public IActionResult confirmedMessage()
+        public IActionResult IdentifyDuplicateEmail(string email)
         {
-            ViewBag.Message = "کاربر با موفقیت ثبت شد ";
+            if (!email.EndsWith(".ir") && (!email.EndsWith(".com")))
+            {
+                return Json("ایمیل می‌بایست با ir. یا com. خاتمه یابد");
+            }
+            if (_dbcontext.Users.Any(c => c.Email == email))
+            {
+                return Json("کاربر فعلی با این ایمیل قبلا ثبت نام شده است!");
+            }
+            return Json(true);
+        }
+
+        [AcceptVerbs("Get", "Post")]
+        public IActionResult VerifyPhone(string phone)
+        {
+            if (_dbcontext.Users.Any(u => u.Phone == phone))
+            {
+                return Json("این شماره تلفن قبلاً ثبت شده است");
+            }
+            // بررسی شروع با 09
+            if (!phone.StartsWith("09"))
+            {
+                return Json("شماره همراه باید با 09 شروع شود");
+            }
+            // بررسی طول 11 رقمی
+            if (phone.Length != 11)
+            {
+                return Json("شماره همراه باید 11 رقمی باشد");
+            }
+            // بررسی اینکه فقط شامل رقم باشد
+            if (!Regex.IsMatch(phone, @"^\d+$"))
+            {
+                return Json("شماره همراه باید فقط شامل رقم باشد");
+            }
+            // بررسی فرمت صحیح (اختیاری)
+            //if (!Regex.IsMatch(phone, @"^09[0-9]{9}$"))
+            //{
+            //    return Json("فرمت شماره همراه صحیح نمی‌باشد");
+            //}
+            return Json(true);
+        }
+
+        public IActionResult Welcome()
+        {
             return View();
         }
 
+        // Login
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
 
+        [HttpPost]
         public IActionResult Login(LoginViewModel login)
         {
             if (!ModelState.IsValid)
             {
-                return View(login); 
-            }
-
-            var user = _dbContext.Users.SingleOrDefault(u => u.Email == login.Email && u.Password == login.Password);
-            if (user == null || user.Role != "User")
-            {
-                ModelState.AddModelError("Email", "اطلاعات صحیح نیست");
                 return View(login);
             }
-
-            var claims = new List<Claim>
+            else
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Role, user.Role),
-            };
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var user = _dbcontext.Users.SingleOrDefault(i =>
+                i.Password == login.Password && i.Email == login.Email);
+                if (user == null)
+                {
+                    ModelState.AddModelError("Password", "کلمه عبور نادرست می‌باشد");
+                    return View(login);
+                }
+                else
+                {
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                        new Claim(ClaimTypes.Name, user.Name),
+                        new Claim(ClaimTypes.Role, user.Role),
+                        new Claim(ClaimTypes.Email, user.Email),
+                        new Claim("Role", user.Role!),
+                        new Claim("UserId", user.Id!.ToString())
+                    };
+                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var principal = new ClaimsPrincipal(identity);
+                    HttpContext.SignInAsync(principal);
 
-            var principal = new ClaimsPrincipal(identity);
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+        }
 
-            var properties = new AuthenticationProperties
+        public IActionResult VerifyEmail(string email)
+        {
+            if (_dbcontext.Users.Any(c => c.Email == email))
             {
-                IsPersistent = login.RememberMe
-            };
-
-            HttpContext.SignInAsync(principal, properties);
-
-            return Redirect("/");
+                return Json(true);
+            }
+            return Json("ایمیل نادرست وارد شده است!");
         }
 
         public IActionResult Logout()
@@ -112,10 +150,58 @@ namespace project1.Controllers
             return Redirect("/Home/Index");
         }
 
- 
-        public IActionResult Index()
+        // لیست کاربران (فقط ادمین)
+        [Authorize(policy: "Admin")]
+        public IActionResult SearchUsers(string q)
         {
-            return View();
+            var users = _dbcontext.Users
+                .Where(u =>
+                    u.Name.Contains(q) ||
+                    u.Email.Contains(q) ||
+                    u.Phone.Contains(q))
+                .ToList();
+
+            return View(users);
+        }
+        public IActionResult UserList()
+        {
+            var users = _dbcontext.Users.ToList();
+            return View(users);
+        }
+
+        // نمایش صفحه ویرایش کاربر
+        [Authorize(policy: "Admin")]
+        public IActionResult EditUser(int id)
+        {
+            var user = _dbcontext.Users.FirstOrDefault(u => u.Id == id);
+            if (user == null) return NotFound();
+            return View("~/Views/Account/EditUser.cshtml", user);
+
+        }
+        // ذخیره تغییرات کاربر
+        [HttpPost]
+        [Authorize(policy: "Admin")]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditUser(int id, project1.Models.User model)
+        {
+            if (id != model.Id) return BadRequest();
+
+            var user = _dbcontext.Users.FirstOrDefault(u => u.Id == id);
+            if (user == null) return NotFound();
+
+            user.Name = user.Name;
+            user.Email = user.Email;
+            user.Password = model.Password;
+            user.Role = model.Role;
+            user.Phone = user.Phone;
+            user.IsPremium = user.IsPremium;
+            user.IsActive = model.IsActive;
+            user.TotalFineAmount = user.TotalFineAmount;
+            user.IsBlocked = user.IsBlocked;
+
+            _dbcontext.SaveChanges();
+            return RedirectToAction("Index", "Users");
         }
     }
 }
+

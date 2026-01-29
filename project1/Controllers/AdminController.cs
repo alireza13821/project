@@ -1,118 +1,196 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using project1.Data;
 using project1.Models;
-using System.Security.Claims;
 
 namespace project1.Controllers
 {
-    
+    [Authorize(policy: "Admin")]
     public class AdminController : Controller
     {
-        private MyDBContext _dbContext;
-        public AdminController(MyDBContext context)
+        private readonly MyDbContext _dbcontext;
+
+        public AdminController(MyDbContext context)
         {
-
-            _dbContext = context;
-
+            _dbcontext = context;
         }
 
-        public IActionResult AdminLogin(AdminLoginViewModel login)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(login); 
-            }
-
-            
-            var user = _dbContext.Users.SingleOrDefault(u => u.Email == login.Email && u.Password == login.Password);
-
-            if (user == null || user.Role != "Admin") 
-            {
-                ModelState.AddModelError("Email", "اطلاعات ورود صحیح نیست یا شما ادمین نیستید.");
-                return View(login); 
-            }
-
-            
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Role, user.Role),                 
-            };
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-            var principal = new ClaimsPrincipal(identity);
-
-            var properties = new AuthenticationProperties
-            {
-                IsPersistent = login.RememberMe
-            };
-
-            HttpContext.SignInAsync(principal, properties);
-            return RedirectToAction("Index", "Admin");
-        }
-
-        [Authorize(Roles = "Admin")]
-        public IActionResult AdminLogout()
-        {
-
-            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("AdminLogin", "Admin");
-        }
-
-        [Authorize(Roles = "Admin")]
+        // 📚 صفحه مدیریت کتاب‌ها
         public IActionResult Index()
         {
-            var users = _dbContext.Users.ToList();
+            var books = _dbcontext.Books.ToList();
+            return View(books);
+        }
+
+        // 💰 گزارش‌گیری مالی
+        public IActionResult FinancialReport()
+        {
+            var bookOrders = _dbcontext.Orders
+                .Where(o => o.IsPaid)
+                .Include(o => o.User)
+                .ToList();
+
+            var subscriptions = _dbcontext.Subscriptions
+                .Include(s => s.User)
+                .ToList();
+
+            var paidFines = _dbcontext.Fines
+                .Where(f => f.IsPaid)
+                .Include(f => f.User)
+                .ToList();
+
+            var unpaidFines = _dbcontext.Fines
+                .Where(f => !f.IsPaid)
+                .Include(f => f.User)
+                .ToList();
+
+            var viewModel = new FinancialReportViewModel
+            {
+                BookOrders = bookOrders,
+                Subscriptions = subscriptions,
+                PaidFines = paidFines,
+                UnpaidFines = unpaidFines,
+
+                TotalBookSales = bookOrders.Sum(o => o.TotalPrice),
+                TotalSubscriptionSales = subscriptions.Sum(s => s.Price),
+                TotalPaidFines = paidFines.Sum(f => f.Amount),
+                TotalUnpaidFines = unpaidFines.Sum(f => f.Amount)
+            };
+
+            return View(viewModel);
+        }
+
+        // 🔍 سرچ کتاب‌ها (ادمین)
+        [HttpGet]
+        public IActionResult SearchBooks(string q)
+        {
+            if (string.IsNullOrWhiteSpace(q))
+                return View(new List<Book>());
+
+            q = q.Trim();
+
+            var books = _dbcontext.Books
+                .Where(b =>
+                    b.Name.Contains(q) ||
+                    b.Author.Contains(q)).ToList();
+
+            return View(books);
+        }
+
+
+        // 🔍 سرچ کاربران (GET – مخصوص Enter و URL)
+        [HttpGet]
+        public IActionResult SearchUser(string search)
+        {
+            if (string.IsNullOrWhiteSpace(search))
+                return View(new List<User>());
+
+            search = search.Trim();
+
+            var users = _dbcontext.Users
+                .Where(u => (u.Role == "User" || u.Role == "Librarian")&&
+                    (u.Name.Contains(search) ||
+                     u.Email.Contains(search))).ToList();
+
             return View(users);
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpPost]
-        public IActionResult PromoteToLibrarian(int userId)
-        {
-            var user = _dbContext.Users.SingleOrDefault(u => u.Id == userId);
-            if (user != null)
-            {
-                user.Role = "librarian"; 
-                _dbContext.SaveChanges();
-            }
-            return RedirectToAction("Index");
-        }
 
-        [Authorize(Roles = "Admin")]
+        // ➕ افزودن کتاب
         public IActionResult AddBook()
         {
             return View();
         }
 
         [HttpPost]
-        public IActionResult AddBook(AddBookViewModel AddBookViewModel)
+        public IActionResult AddBook(AddBookViewModel model)
         {
-            var book = new Book();
-            book.Name = AddBookViewModel.Name;
-            book.Description = AddBookViewModel.Description;
-            book.Quantity=AddBookViewModel.Quantity;
+            if (!ModelState.IsValid)
+                return View(model);
 
-            _dbContext.Books.Add(book);
-            _dbContext.SaveChanges();
-
-            if (AddBookViewModel.picture?.Length > 0)
+            var book = new Book
             {
-                string filePath = Path.Combine(Directory.GetCurrentDirectory(),
-                    "wwwroot",
-                    "img",
-                    book.Id + Path.GetExtension(AddBookViewModel.picture.FileName));
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    AddBookViewModel.picture.CopyTo(stream);
-                }
+                Name = model.Name!,
+                Description = model.Description,
+                TotalQuantity = model.Quantity,
+                AvailableQuantity = model.Quantity,
+                Author = model.Author,
+                PublishedYear = model.PublishedYear,
+                Type = model.Type,
+                Price = model.Price,
+                IsActive = true
+            };
+
+            _dbcontext.Books.Add(book);
+            _dbcontext.SaveChanges();
+
+            if (model.Picture?.Length > 0)
+            {
+                var filePath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot", "img",
+                    book.Id + Path.GetExtension(model.Picture.FileName));
+
+                using var stream = new FileStream(filePath, FileMode.Create);
+                model.Picture.CopyTo(stream);
             }
+
             return RedirectToAction("Index");
         }
 
+        // ✏️ ویرایش کتاب
+        public IActionResult EditBook(int id)
+        {
+            var book = _dbcontext.Books.Find(id);
+            if (book == null) return NotFound();
+
+            var model = new AddBookViewModel
+            {
+                Id = book.Id,
+                Name = book.Name,
+                Description = book.Description,
+                Author = book.Author,
+                Type = book.Type,
+                Quantity = book.TotalQuantity,
+                PublishedYear = book.PublishedYear,
+                Price = book.Price
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult EditBook(AddBookViewModel model)
+        {
+            var book = _dbcontext.Books.Find(model.Id);
+            if (book == null) return NotFound();
+
+            book.Name = model.Name!;
+            book.Description = model.Description;
+            book.Author = model.Author;
+            book.Type = model.Type;
+            book.TotalQuantity = model.Quantity;
+            book.PublishedYear = model.PublishedYear;
+            book.Price = model.Price;
+            if (book.AvailableQuantity > model.Quantity)
+                book.AvailableQuantity = model.Quantity;
+            else
+                book.AvailableQuantity = book.TotalQuantity;
+            _dbcontext.SaveChanges();
+
+            if (model.Picture?.Length > 0)
+            {
+                var filePath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot", "img",
+                    model.Id + Path.GetExtension(model.Picture.FileName));
+
+                using var stream = new FileStream(filePath, FileMode.Create);
+                model.Picture.CopyTo(stream);
+            }
+
+            return RedirectToAction("Index");
+        }
     }
 }

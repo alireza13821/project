@@ -1,0 +1,44 @@
+﻿@model Conversation
+@{
+    int myId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+    var otherUser = ViewBag.OtherUser;
+}
+
+<h4>💬 گفتگو با @otherUser.Name</h4>
+@if(otherUser.Role == "Admin")
+{
+    <p>ادمین</p>
+}
+@if(otherUser.Role == "Librarian")
+{
+    <p>کتابدار</p>
+}
+@if (otherUser.Role == "User")
+{
+    <p>کاربر</p>
+}
+<hr />
+<div class="border rounded p-3 mb-3" style="height:350px; overflow-y:auto;">
+    @foreach (var msg in Model.Messages!.OrderBy(m => m.SentAt))
+    {
+        bool isMe = msg.SenderId == myId;
+
+        <div class="mb-2 text-@(isMe ? "end" : "start")">
+            <span class="badge @(isMe ? "bg-primary" : "bg-secondary")">
+                @msg.Text
+            </span>
+            <div class="text-muted small">
+                @msg.SentAt.ToString("HH:mm")
+            </div>
+        </div>
+    }
+</div>
+
+<form asp-action="SendMessage" method="post">
+    <input type="hidden" name="conversationId" value="@Model.Id" />
+
+    <div class="input-group">
+        <input type="text" name="text" class="form-control" required />
+        <button class="btn btn-success">ارسال</button>
+    </div>
+</form>

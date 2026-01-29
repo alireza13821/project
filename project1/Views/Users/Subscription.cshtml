@@ -1,0 +1,50 @@
+﻿@model project1.Models.SubscriptionViewModel
+
+@{
+    ViewData["Title"] = "اشتراک ویژه";
+}
+
+<h2 class="text-center">🌟 اشتراک ویژه</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (Model.HasActiveSubscription)
+{
+    <div class="alert alert-info">
+        <p>✅ شما اشتراک ویژه فعال دارید.</p>
+        <p>📅 تاریخ انقضا: <strong>@Model.ExpireDate?.ToShortDateString()</strong></p>
+        <p>⏳ روزهای باقی‌مانده: <strong>@Model.RemainingDays</strong> روز</p>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+        <p>❌ شما در حال حاضر اشتراک ویژه ندارید.</p>
+    </div>
+
+    <h4>✨ مزایای اشتراک ویژه</h4>
+    <ul>
+        <li>📚 امانت کتاب تا <strong>۱ ماه</strong> (به‌جای ۲ هفته)</li>
+        <li>💸 <strong>۲۰٪ تخفیف</strong> روی خرید کتاب</li>
+        <li>🔔 دریافت اعلان‌ها و پیامک‌های هوشمند</li>
+        <li>⚡ اولویت در رزرو کتاب‌ها</li>
+    </ul>
+
+    <hr />
+
+    <p>
+        💰 هزینه اشتراک ۳ ماهه:
+        <strong>۸۰۰٬۰۰۰ تومان</strong>
+    </p>
+
+    <form asp-action="BuySubscription" method="post">
+        <button type="submit" class="btn btn-success">
+            خرید اشتراک ویژه
+        </button>
+    </form>
+}

@@ -1,0 +1,80 @@
+﻿@model List<Book>
+@{
+    var activeBorrows = ViewBag.ActiveBorrows as List<Borrow>;
+}
+
+<h2>📚 امانت‌های در انتظار ثبت</h2>
+
+@if (!Model.Any())
+{
+    <p>کتابی برای امانت انتخاب نشده است.</p>
+}
+else
+{
+    <table class="table">
+        <tr>
+            <th>کتاب</th>
+            <th>عملیات</th>
+        </tr>
+        @foreach (var book in Model)
+        {
+            <tr>
+                <td>@book.Name</td>
+                <td>
+                    <a asp-action="RemoveBorrow"
+               asp-route-bookId="@book.Id"
+               class="btn btn-danger btn-sm">
+                        حذف
+                    </a>
+                </td>
+            </tr>
+        }
+    </table>
+
+    <form asp-action="ConfirmBorrows" method="post">
+        <button class="btn btn-success">
+            ثبت نهایی امانت
+        </button>
+    </form>
+}
+
+<hr />
+
+<h3>📌 امانت‌های فعال من</h3>
+
+@if (activeBorrows == null || !activeBorrows.Any())
+{
+    <p>امانت فعالی ندارید.</p>
+}
+else
+{
+    <table class="table">
+        <tr>
+            <th>کتاب</th>
+            <th>تاریخ تحویل</th>
+            <th>تمدید</th>
+        </tr>
+        @foreach (var b in activeBorrows)
+        {
+            <tr>
+                <td>@b.Book.Name</td>
+                <td>@b.DueDate.ToString("yyyy/MM/dd")</td>
+                <td>
+                    @if (b.RenewedCount < 2)
+                    {
+                        <a asp-action="RenewBorrow"
+               asp-route-id="@b.Id"
+               class="btn btn-warning btn-sm">
+                            تمدید
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+}
+<a asp-action="Reserves"
+   asp-controller="Home"
+   class="btn btn-info mb-3">
+    📌 رزروهای من
+</a>

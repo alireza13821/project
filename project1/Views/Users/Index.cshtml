@@ -1,0 +1,192 @@
+﻿@model List<User>
+
+@{
+    ViewData["Title"] = "مدیریت کاربران";
+}
+<h2>به صفحه مدیریت کاربران خوش آمدید</h2>
+<div class="actions">
+<a class="nav-link" asp-controller="Admin" asp-action="SearchUser">
+    جستجوی کاربران</a>
+</div>
+<div class="container">
+    <table>
+        <thead>
+            <tr>
+                <th>نام</th>
+                <th>ایمیل</th>
+                <th>رمز عبور</th>
+                <th>نقش</th>
+                <th>بدهی</th>
+                <th>اشتراک</th>
+                <th>Actine/InActive</th>
+                <th>Blocked/UnBlock</th>
+                <th>ویرایش کاربر</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.Name</td>
+                    <td>@user.Email</td>
+                    <td>@user.Password</td>
+                    <td>
+                        @if (user.Role == "User")
+                        {
+                            <span style="color: green; font-weight: bold;">کاربر عادی</span>
+                        }
+                        @if (user.Role == "Admin")
+                        {
+                            <span style="color: blue; font-weight: bold;">مدیر</span>
+                        }
+                        @if (user.Role == "Librarian")
+                        {
+                            <span style="color: orange; font-weight: bold;">کتابدار</span>
+                        }
+                    </td>
+                    <td>
+                        @if (user.Role == "User")
+                        {
+                            <span style="color: red; font-weight: bold;">@user.TotalFineAmount</span>
+                        }
+                        else
+                        {
+                            <span>-</span>
+                        }
+                    </td>
+                    <td>
+                        @if (user.Role == "User" && user.IsPremium)
+                        {
+                            <span style="color: darkorchid; font-weight: bold;">دارد</span>
+                        }
+                        @if (user.Role == "User" && !(user.IsPremium))
+                        {
+                            <span style="color: darkorchid; font-weight: bold;">ندارد</span>
+                        }
+                        @if (user.Role != "User")
+                        {
+                            <span>-</span>
+                        }
+                    </td>
+                    <td>
+                        @if (user.Role != "Admin" && user.IsActive)
+                        {
+                            <span style="color: darkgreen; font-weight: bold;">فعال</span>
+                        }
+                        @if (user.Role != "Admin" && !(user.IsActive))
+                        {
+                            <span style="color: crimson; font-weight: bold;">غیرفعال</span>
+                        }
+                        @if (user.Role == "Admin")
+                        {
+                            <span>-</span>
+                        }
+                    </td>
+                    <td>
+                        @if (user.Role == "User" && !(user.IsBlocked))
+                        {
+                            <span style="color: forestgreen; font-weight: bold;">مسدود‌نشده</span>
+                        }
+                        @if (user.Role == "User" && user.IsBlocked)
+                        {
+                            <span style="color: red; font-weight: bold;">مسدود‌شده</span>
+                        }
+                        @if(user.Role != "User")
+                        {
+                            <span>-</span>
+                        }
+                    </td>
+                    <td>
+                        <a class="btn btn-secondary" asp-controller="Account" asp-action="EditUser"
+                           asp-route-Id=@user.Id>ویرایش کاربر</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        font-family: Arial, sans-serif;
+    }
+
+    h2 {
+        color: #1565c0;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        font-size: 2rem;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .actions {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+        .actions a {
+            text-decoration: none;
+            display: inline-block;
+            background-color: #2e7d32;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+            .actions a:hover {
+                background-color: #1b5e20;
+                transform: scale(1.05);
+            }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px auto;
+        background-color: #ffffff;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    thead {
+        background-color: #1565c0;
+        color: white;
+    }
+
+    th, td {
+        padding: 15px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #e3f2fd;
+    }
+
+    button {
+        background-color: #1565c0;
+        border: none;
+        color: white;
+        padding: 8px 14px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        button:hover {
+            background-color: #0d47a1;
+            transform: scale(1.05);
+        }
+
+    form {
+        display: inline;
+    }
+</style>

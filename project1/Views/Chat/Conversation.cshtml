@@ -1,0 +1,20 @@
+﻿@model List<project1.Models.Message>
+
+<h3>💬 گفتگو</h3>
+
+<div style="border:1px solid #ccc;height:400px;overflow-y:auto;padding:10px">
+    @foreach (var msg in Model)
+    {
+        <div style="margin-bottom:10px">
+            <b>@msg.SenderId</b> :
+            <span>@msg.Text</span>
+            <small style="color:gray">(@msg.SentAt.ToShortTimeString())</small>
+        </div>
+    }
+</div>
+
+<form asp-action="SendMessage" method="post" style="margin-top:10px">
+    <input type="hidden" name="conversationId" value="@ViewBag.ConversationId" />
+    <input type="text" name="text" style="width:80%" required />
+    <button type="submit">ارسال</button>
+</form>

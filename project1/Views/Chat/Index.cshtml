@@ -1,0 +1,27 @@
+﻿@model List<Conversation>
+
+<h3 class="mb-4">💬 گفتگوهای من</h3>
+
+@if (!Model.Any())
+{
+    <p>هنوز گفتگویی ندارید.</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var c in Model)
+        {
+            int myId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            int otherId = c.User1Id == myId ? c.User2Id : c.User1Id;
+
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                گفتگو با کاربر #@otherId
+                <a asp-action="OpenChat" asp-route-otherUserId="@otherId"
+                   class="btn btn-sm btn-primary">
+                    ورود
+                </a>
+            </li>
+        }
+    </ul>
+}
+

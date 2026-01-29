@@ -1,0 +1,26 @@
+﻿@model List<User>
+
+<h3>نتایج جستجوی کاربران</h3>
+
+<table class="table">
+    <tr>
+        <th>نام</th>
+        <th>ایمیل</th>
+        <th>عملیات</th>
+    </tr>
+
+    @foreach (var u in Model)
+    {
+            <tr>
+                <td>@u.Name</td>
+                <td>@u.Email</td>
+                <td>
+                    <a asp-action="EditUser"
+                   asp-route-id="@u.Id"
+                   class="btn btn-sm btn-primary">
+                        ویرایش
+                    </a>
+                </td>
+            </tr>
+    }
+</table>

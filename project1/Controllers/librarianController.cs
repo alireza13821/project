@@ -9,137 +9,87 @@ using System.Security.Claims;
 
 namespace project1.Controllers
 {
-    
+
+    [Authorize(policy: "librarian")]
     public class librarianController : Controller
     {
-        private MyDBContext _dbContext;
-        public librarianController(MyDBContext context)
+        private MyDbContext _dbcontext;
+        public librarianController(MyDbContext context)
         {
-
-            _dbContext = context;
-
+            _dbcontext = context;
         }
 
-        public IActionResult librarianLogin(librarianLoginViewModel login)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(login);
-            }
+        //public IActionResult Index()
+        //{
 
+        //    var reserveViewModels = _dbcontext.Reserves
+        //        .Where(r => r.IsFinaly && !r.IsApproved && r.Status == "در حال بررسی")
+        //        .Include(r => r.User)
+        //        .Include(r => r.ReserveItems)
+        //        .ThenInclude(ri => ri.book)
+        //        .Select(r => new ReserveViewModel
+        //        {
+        //            Id = r.Id,
+        //            CreateDate = r.CreateDate,
+        //            FullName = r.User != null ? $"{r.User.Name}" : "Unknown",
+        //            ReserveItems = r.ReserveItems,
+        //            Status = r.Status
+        //        })
+        //        .ToList();
 
-            var user = _dbContext.Users.SingleOrDefault(u => u.Email == login.Email && u.Password == login.Password);
+        //    return View(reserveViewModels);
+        //}
 
-            if (user == null || user.Role != "librarian")
-            {
-                ModelState.AddModelError("Email", "اطلاعات ورود صحیح نیست یا شما کتابدار نیستید.");
-                return View(login);
-            }
+        //[HttpPost]
+        //public IActionResult ApproveRequest(int reserveId)
+        //{
+        //    var reserve = _dbcontext.Reserves
+        //        .Include(r => r.ReserveItems)
+        //        .ThenInclude(ri => ri.book)
+        //        .SingleOrDefault(r => r.Id == reserveId && !r.IsApproved && r.IsFinaly);
 
+        //    if (reserve != null)
+        //    {
 
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Role, user.Role),
-            };
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        //        foreach (var reserveItem in reserve.ReserveItems)
+        //        {
+        //            var book = reserveItem.book;
+        //            if (book.Quantity > 0)
+        //            {
+        //                book.Quantity--;  
+        //            }
+        //            else
+        //            {
+        //                return Content("موجودی یکی از کتاب‌ها کافی نیست.");
+        //            }
+        //        }
 
-            var principal = new ClaimsPrincipal(identity);
+        //        reserve.IsApproved = true;
+        //        reserve.Status = "تایید شده"; 
+        //        reserve.IsRejected = false;
+        //        _dbcontext.SaveChanges();
+        //    }
 
-            var properties = new AuthenticationProperties
-            {
-                IsPersistent = login.RememberMe
-            };
+        //    return RedirectToAction("Index");
+        //}
 
-            HttpContext.SignInAsync(principal, properties);
-            return RedirectToAction("Index", "librarian");
-        }
+        //[HttpPost]
+        //public IActionResult RejectRequest(int reserveId, string reason)
+        //{
+        //    var reserve = _dbcontext.Reserves
+        //        .SingleOrDefault(r => r.Id == reserveId && !r.IsApproved);
 
-        [Authorize(Roles = "librarian")]
-        public IActionResult librarianLogout()
-        {
+        //    if (reserve != null)
+        //    {
+        //        reserve.Status = "رد شده";  
+        //        reserve.IsFinaly = true;
+        //        reserve.IsApproved = false;
+        //        reserve.IsRejected = true;
+        //        reserve.RejectionReason = reason; 
+        //        _dbcontext.SaveChanges();
+        //    }
 
-            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("AdminLogin", "Admin");
-        }
-
-        [Authorize(Roles = "librarian")]
-        public IActionResult Index()
-        {
-
-            var reserveViewModels = _dbContext.Reserves
-                .Where(r => r.IsFinaly && !r.IsApproved && r.Status == "در حال بررسی")
-                .Include(r => r.User)
-                .Include(r => r.ReserveItems)
-                .ThenInclude(ri => ri.book)
-                .Select(r => new ReserveViewModel
-                {
-                    Id = r.Id,
-                    CreateDate = r.CreateDate,
-                    FullName = r.User != null ? $"{r.User.Name} {r.User.LastName}" : "Unknown",
-                    ReserveItems = r.ReserveItems,
-                    Status = r.Status
-                })
-                .ToList();
-
-            return View(reserveViewModels);
-        }
-
-
-        [Authorize(Roles = "librarian")]
-        [HttpPost]
-        public IActionResult ApproveRequest(int reserveId)
-        {
-            var reserve = _dbContext.Reserves
-                .Include(r => r.ReserveItems)
-                .ThenInclude(ri => ri.book)
-                .SingleOrDefault(r => r.Id == reserveId && !r.IsApproved && r.IsFinaly);
-
-            if (reserve != null)
-            {
-
-                foreach (var reserveItem in reserve.ReserveItems)
-                {
-                    var book = reserveItem.book;
-                    if (book.Quantity > 0)
-                    {
-                        book.Quantity--;  
-                    }
-                    else
-                    {
-                        return Content("موجودی یکی از کتاب‌ها کافی نیست.");
-                    }
-                }
-
-                reserve.IsApproved = true;
-                reserve.Status = "تایید شده"; 
-                reserve.IsRejected = false;
-                _dbContext.SaveChanges();
-            }
-
-            return RedirectToAction("Index");
-        }
-
-        [Authorize(Roles = "librarian")]
-        [HttpPost]
-        public IActionResult RejectRequest(int reserveId, string reason)
-        {
-            var reserve = _dbContext.Reserves
-                .SingleOrDefault(r => r.Id == reserveId && !r.IsApproved);
-
-            if (reserve != null)
-            {
-                reserve.Status = "رد شده";  
-                reserve.IsFinaly = true;
-                reserve.IsApproved = false;
-                reserve.IsRejected = true;
-                reserve.RejectionReason = reason; 
-                _dbContext.SaveChanges();
-            }
-
-            return RedirectToAction("Index");
-        }
-
+        //    return RedirectToAction("Index");
+        //}
     }
 }

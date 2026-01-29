@@ -1,4 +1,5 @@
-﻿@model project1.Models.AddBookViewModel
+﻿
+@model project1.Models.AddBookViewModel
 
 @{
     ViewData["Title"] = "Add Book";
@@ -14,31 +15,70 @@
                 <hr />
                 <form asp-action="AddBook" enctype="multipart/form-data" class="needs-validation" novalidate>
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    
+
+                    <!-- نام کتاب -->
                     <div class="form-group my-3">
-                        <label asp-for="Name" class="form-label text-dark">نام کتاب</label>
-                        <input asp-for="Name" class="form-control border-primary shadow-sm" placeholder="نام کتاب را وارد کنید" />
+                        <label asp-for="Name" class="form-label text-dark">نام</label>
+                        <input asp-for="Name" class="form-control border-primary shadow-sm" placeholder="نام کتاب" />
                         <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
 
+                    <!-- توضیحات -->
                     <div class="form-group my-3">
-                        <label asp-for="Description" class="form-label text-dark">توضیحات کتاب</label>
-                        <textarea asp-for="Description" class="form-control border-primary shadow-sm" rows="3" placeholder="توضیحات کوتاه درباره کتاب"></textarea>
+                        <label asp-for="Description" class="form-label text-dark">توضیحات مختصر و مفید</label>
+                        <textarea asp-for="Description" class="form-control border-primary shadow-sm"
+                        rows="3" placeholder="توضیحات کوتاه مرتبط با کتاب"></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
 
                     <div class="form-group my-3">
-                        <label asp-for="Quantity" class="form-label text-dark">تعداد کتاب</label>
-                        <input asp-for="Quantity" class="form-control border-primary shadow-sm" type="number" min="1" placeholder="تعداد موجودی کتاب را وارد کنید" />
+                        <label asp-for="Author" class="form-label text-dark">نویسنده</label>
+                        <textarea asp-for="Author" class="form-control border-primary shadow-sm"
+                        rows="3" placeholder="نویسنده کتاب"></textarea>
+                        <span asp-validation-for="Author" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group my-3">
+                        <label asp-for="PublishedYear" class="form-label text-dark">سال انتشار</label>
+                        <input asp-for="PublishedYear" class="form-control border-primary shadow-sm" type="number"
+                        maxlength="4" placeholder="سال انتشار کتاب به شمسی" />
+                        <span asp-validation-for="PublishedYear" class="text-danger"></span>
+                    </div>
+
+                    <!-- تعداد کتاب -->
+                    <div class="form-group my-3">
+                        <label asp-for="Quantity" class="form-label text-dark">موجودی</label>
+                        <input asp-for="Quantity" class="form-control border-primary shadow-sm" type="number"
+                        min="1" placeholder="تعداد موجودی کل کتاب" />
                         <span asp-validation-for="Quantity" class="text-danger"></span>
                     </div>
 
                     <div class="form-group my-3">
-                        <label asp-for="picture" class="form-label text-dark">بارگزاری تصویر کتاب</label>
-                        <input asp-for="picture" class="form-control border-primary shadow-sm" type="file" />
-                        <span asp-validation-for="picture" class="text-danger"></span>
+                        <label asp-for="Price" class="form-label text-dark">قیمت</label>
+                        <input asp-for="Price" class="form-control border-primary shadow-sm" type="number"
+                               min="0" placeholder="قیمت کتاب" />
+                        <span asp-validation-for="Price" class="text-danger"></span>
                     </div>
 
+                    <!--  تصویر -->
+                    <div class="form-group my-3">
+                        <label asp-for="Picture" class="form-label text-dark">تصویر</label>
+                        <input asp-for="Picture" class="form-control border-primary shadow-sm" type="file" />
+                        <span asp-validation-for="Picture" class="text-danger"></span>
+                    </div>
+
+                    <!--  نوع کتاب (فروشی / امانتی) -->
+                    <div class="form-group my-3">
+                        <label asp-for="Type" class="form-label text-dark">نوع کتاب</label>
+                        <select asp-for="Type" class="form-select border-primary shadow-sm">
+                        <option value="">-- انتخاب کنید --</option>
+                        <option value="Sale">فروشی</option>
+                        <option value="Borrow">امانتی</option>
+                        </select>
+                        <span asp-validation-for="Type" class="text-danger"></span>
+                    </div>
+
+                    <!-- دکمه‌ها -->
                     <div class="form-group text-center mt-4">
                         <button type="submit" class="btn btn-primary px-4 py-2 shadow">ایجاد</button>
                         <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2 shadow ms-3">بازگشت به صفحه اصلی</a>
@@ -50,12 +90,14 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
 
 <style>
     body {
-        background-color: #e7f3ff; 
+        background-color: #e7f3ff;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .card {
@@ -85,10 +127,10 @@
         background-color: #6c757d;
         color: #fff;
     }
-    input, textarea {
+    input, textarea, select {
         transition: all 0.3s ease-in-out;
     }
-    input:focus, textarea:focus {
+    input:focus, textarea:focus, select:focus {
         outline: none;
         box-shadow: 0px 0px 8px #007bff;
     }

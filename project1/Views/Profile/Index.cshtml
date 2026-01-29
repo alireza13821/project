@@ -1,0 +1,65 @@
+﻿@model User
+
+<h2 class="text-center">پروفایل من🙂</h2>
+
+@if (Model == null)
+{
+    <p>اطلاعاتی یافت نشد</p>
+}
+else
+{
+    <form asp-action="Update" method="post"><input type="hidden" asp-for="Id" />
+
+        <div class="mb-2">
+            <label>نام</label>
+            <input asp-for="Name" class="form-control" />
+        </div>
+
+        <div class="mb-2">
+            <label>نقش</label>
+            <input asp-for="Role" class="form-control bg-white" readonly />
+        </div>
+
+        <div class="mb-2">
+            <label>ایمیل</label>
+            <input asp-for="Email" class="form-control" />
+        </div>
+
+        <div class="mb-2">
+            <label>پسورد</label>
+            <input asp-for="Password" class="form-control" />
+        </div>
+
+        <div class="mb-2">
+            <label>شماره تلفن همراه</label>
+            <input asp-for="Phone" class="form-control" />
+        </div>
+
+        <div class="mb-2">
+            <label>تاریخ ثبت‌نام</label>
+            <input asp-for="RegisterDate" class="form-control" readonly />
+        </div>
+
+        @* <div class="mb-2">
+            <label>وضعیت اشتراک</label>
+            <input asp-for="IsPremium" class="form-control" readonly />
+        </div>
+
+        <div class="mb-2">
+            <label>مسدود شده(True)/نشده(False)</label>
+            <input asp-for="IsBlocked" class="form-control" readonly />
+        </div> *@
+
+        <div class="mb-2">
+            <label>مقدار بدهکاری</label>
+            <input asp-for="TotalFineAmount" class="form-control" readonly/>
+        </div>
+
+        <button class="btn btn-success">ذخیره</button>
+       @*  <a asp-action="MyOrders"
+       class="btn btn-outline-primary ">
+            📦 مشاهده تاریخچه خریدها
+        </a> *@
+    </form>
+}
+

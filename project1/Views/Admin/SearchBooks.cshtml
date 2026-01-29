@@ -1,0 +1,41 @@
+﻿@model List<Book>
+
+<h2>جستجوی کتاب‌</h2>
+
+<form asp-action="SearchBooks" method="get" class="mb-3">
+    <input type="text"
+           name="q"
+           class="form-control"
+           placeholder="نام یا نویسنده کتاب..." />
+</form>
+
+@if (Model != null && Model.Any())
+{
+    <div class="row">
+        @foreach (var book in Model)
+        {
+            <div class="col-md-2 mb-3 ">
+                <div class="card p-2 align-items-center">
+                    <img src="/img/@(book.Id).jpg"
+                 style="width:60px;height:90px;object-fit:cover" />
+                    <h5 class="text-center">@book.Name</h5>
+                    <p class="text-center">@book.Author</p>
+                    @if (book.Type.ToString() == "Sale")
+                    {
+                        <p class="text-center" style="color: lightseagreen;
+                        font-weight: bold;">فروشی</p>
+                    }
+                    @if (book.Type.ToString() == "Borrow")
+                    {
+                        <p class="text-center" style="color: lightseagreen;
+                                    font-weight: bold;">امانتی</p>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p class="text-muted">کتابی یافت نشد</p>
+}

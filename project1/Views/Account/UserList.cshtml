@@ -1,0 +1,29 @@
+﻿@model IEnumerable<project1.Models.User>
+@{
+    ViewData["Title"] = "لیست کاربران";
+}
+
+<h2>لیست کاربران</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>نام</th>
+            <th>ایمیل</th>
+            <th>نقش</th>
+            <th>ویرایش</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+                <tr>
+                    <td>@user.Name</td>
+                    <td>@user.Email</td>
+                    <td>@user.Role</td>
+                    <td>
+                        <a class="btn btn-sm btn-warning" href="/Account/EditUser/@user.Id">ویرایش</a>
+                    </td>
+                </tr>
+        }
+    </tbody>
+</table>

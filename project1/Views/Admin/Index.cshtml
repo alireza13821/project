@@ -1,8 +1,73 @@
-﻿@model List<project1.Models.User>
+﻿@model List<Book>
 
 @{
-    ViewData["Title"] = "مدیریت کتابداران";
+    ViewData["Title"] = "مدیریت کتب";
 }
+
+<h2>به صفحه مدیریت کتب خوش آمدید</h2>
+
+<div class="actions">
+    <a asp-controller="Admin" asp-action="AddBook">
+        ➕ افزودن کتاب جدید
+    </a>
+</div>
+<div class="actions">
+<a asp-controller="Admin" asp-action="SearchBooks">
+    جستجوی کتاب</a>
+</div>
+<div class="container">
+    
+    <table>
+        <thead>
+            <tr>
+                <th>نام</th>
+                <th>توضیحات</th>
+                <th>تعداد موجودی کل</th>
+                <th>نوع</th>
+                <th>قیمت</th>
+                <th>Actine/InActive</th>
+                <th>ویرایش کتاب</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in Model)
+            {
+                <tr>
+                    <td>@book.Name</td>
+                    <td>@book.Description</td>
+                    <td>@book.TotalQuantity</td>
+                    <td>
+                        @if (book.Type.ToString()=="Borrow")
+                        {
+                            <span style="color: darkorange; font-weight: bold;">امانتی</span>
+                        }
+                        @if (book.Type.ToString() == "Sale")
+                        {
+                            <span style="color: lightseagreen; font-weight: bold;">فروشی</span>
+                        }
+                    </td>
+                    <td>@book.Price</td>
+                    <td>
+                        @if (book.IsActive == true)
+                        {
+                            <span style="color: darkgreen; font-weight: bold;">فعال</span>
+                        }
+                        @if (book.IsActive == false)
+                        {
+                            <span style="color: crimson; font-weight: bold;">غیرفعال</span>
+                        }
+                    </td>
+                    
+                    <td>
+                        <a class="btn btn-secondary" asp-controller="Admin" asp-action="EditBook"
+                           asp-route-Id="@book.Id">ویرایش کتاب</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
 <style>
     body {
@@ -20,24 +85,24 @@
 
     .actions {
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 25px;
     }
 
-    .actions a {
-        text-decoration: none;
-        display: inline-block;
-        background-color: #1565c0;
-        color: white;
-        padding: 10px 15px;
-        border-radius: 5px;
-        font-size: 0.9rem;
-        transition: all 0.3s ease;
-    }
+        .actions a {
+            text-decoration: none;
+            display: inline-block;
+            background-color: #2e7d32;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
 
-    .actions a:hover {
-        background-color: #0d47a1;
-        transform: scale(1.05);
-    }
+            .actions a:hover {
+                background-color: #1b5e20;
+                transform: scale(1.05);
+            }
 
     table {
         width: 100%;
@@ -46,6 +111,7 @@
         background-color: #ffffff;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         border-radius: 10px;
+        overflow: hidden;
     }
 
     thead {
@@ -57,14 +123,6 @@
         padding: 15px;
         text-align: center;
         border: 1px solid #ddd;
-    }
-
-    th {
-        font-size: 1rem;
-    }
-
-    td {
-        font-size: 0.9rem;
     }
 
     tr:nth-child(even) {
@@ -79,70 +137,18 @@
         background-color: #1565c0;
         border: none;
         color: white;
-        padding: 10px 15px;
+        padding: 8px 14px;
         border-radius: 5px;
-        font-size: 0.9rem;
         cursor: pointer;
         transition: all 0.3s ease;
     }
 
-    button:hover {
-        background-color: #0d47a1;
-        transform: scale(1.05);
-    }
+        button:hover {
+            background-color: #0d47a1;
+            transform: scale(1.05);
+        }
 
     form {
         display: inline;
     }
 </style>
-
-<h2>مدیریت کتابداران</h2>
-
-<div class="actions">
-     <a class="nav-link" asp-action="AddBook" asp-controller="Admin">افزودن کتاب جدید</a>
-</div>
-
-<div class="container">
-    <table>
-        <thead>
-            <tr>
-                <th>شناسه</th>
-                <th>نام</th>
-                <th>نام خانوادگی</th>
-                <th>ایمیل</th>
-                <th>نقش</th>
-                <th>عملیات</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in Model)
-            {
-                <tr>
-                    <td>@user.Id</td>
-                    <td>@user.Name</td>
-                    <td>@user.LastName</td>
-                    <td>@user.Email</td>
-                    <td>
-                        @if (user.Role == "User")
-                        {
-                            <span style="color: green; font-weight: bold;">کاربر عادی</span>
-                        }
-                        else if (user.Role == "Admin" || user.Role == "librarian")
-                        {
-                            <span style="color: red; font-weight: bold;">@(user.Role == "Admin" ? "مدیر" : "کتابدار")</span>
-                        }
-                    </td>
-                    <td>
-                        @if (user.Role == "User")
-                        {
-                            <form method="post" asp-action="PromoteToLibrarian">
-                                <input type="hidden" name="userId" value="@user.Id" />
-                                <button type="submit">ارتقا به کتابدار</button>
-                            </form>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
