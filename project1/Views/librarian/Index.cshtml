@@ -1,0 +1,243 @@
+﻿@model List<ReserveViewModel>
+
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">رزروهای درخواست شده</h2>
+    
+    @if (ViewBag.NoPendingRequests != null)
+    {
+        <div class="alert alert-info text-center mt-4">
+            @ViewBag.NoPendingRequests
+        </div>
+    }
+    else if (Model.Any())
+    {
+        <table class="table table-hover table-bordered">
+<thead class="bg-primary text-white">
+    <tr>
+        <th class="text-center">شماره رزرو</th>
+        <th class="text-center">تاریخ رزرو</th>
+        <th class="text-center">درخواست‌دهنده</th> 
+        <th class="text-center">کتاب‌ها</th>
+        <th class="text-center">عملیات</th>
+    </tr>
+</thead>
+<tbody>
+    @foreach (var reserve in Model)
+    {
+        <tr>
+            <td class="text-center align-middle">@reserve.Id</td>
+            <td class="text-center align-middle">@reserve.CreateDate.ToString("yyyy/MM/dd")</td>
+            <td class="text-center align-middle">@reserve.FullName</td>
+            <td>
+                <ul class="list-unstyled mb-0">
+                    @foreach (var item in reserve.ReserveItems)
+                    {
+                        <li class="text-primary">@item.book.Name</li>
+                    }
+                </ul>
+            </td>
+            <td class="text-center align-middle">
+                <form method="post" asp-action="ApproveRequest" asp-route-reserveId="@reserve.Id" class="d-inline">
+                    <button type="submit" class="btn btn-success btn-sm">تایید</button>
+                </form>
+                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectModal" data-reserve-id="@reserve.Id">رد</button>
+            </td>
+        </tr>
+    }
+</tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-info text-center mt-4">
+            هیچ درخواستی برای بررسی وجود ندارد.
+        </div>
+    }
+</div>
+
+
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-action="RejectRequest">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rejectModalLabel">علت رد درخواست</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="reserveId" name="reserveId" />
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">علت رد</label>
+                        <textarea id="reason" name="reason" class="form-control" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">لغو</button>
+                    <button type="submit" class="btn btn-danger">رد درخواست</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const rejectModal = document.getElementById("rejectModal");
+        rejectModal.addEventListener("show.bs.modal", (event) => {
+            const triggerButton = event.relatedTarget;
+            const reserveId = triggerButton.getAttribute("data-reserve-id");
+            document.getElementById("reserveId").value = reserveId;
+        });
+
+        rejectModal.addEventListener("hidden.bs.modal", () => {
+            document.getElementById("reason").value = "";
+        });
+    });
+</script>
+
+
+<style>
+
+
+    body {
+        font-family: 'Arial', sans-serif;
+        line-height: 1.5;
+        background-color: #eaf4fc; 
+        margin: 0;
+        padding: 0;
+    }
+
+ 
+    .container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 40px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+
+    h2 {
+        font-weight: 600;
+        color: #004085; 
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+
+    .table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: separate;
+        border-spacing: 0;
+        background-color: #ffffff;
+        border: 1px solid #dce5ec;
+    }
+
+    .table th, .table td {
+        text-align: center;
+        padding: 10px;
+        vertical-align: middle;
+        border: 1px solid #dce5ec;
+        font-size: 0.9rem;
+    }
+
+    .table th {
+        background-color: #0056b3;
+        color: #ffffff;
+        font-weight: 700;
+    }
+
+    .table td {
+        color: #343a40;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f7faff;
+    }
+
+
+    ul.list-unstyled {
+        padding: 0;
+        margin: 0;
+        list-style-type: none;
+    }
+
+    ul.list-unstyled li {
+        margin-bottom: 6px;
+        font-size: 0.9rem;
+        color: #004085; 
+    }
+
+
+    .alert {
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 15px;
+        text-align: center;
+        margin-top: 20px;
+        border-radius: 6px;
+    }
+
+    .alert-info {
+        background-color: #d8ecfc; 
+        color: #0c5460; 
+        border: 1px solid #bee5eb;
+    }
+
+
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        border-radius: 4px;
+    }
+
+    .btn-success {
+        background-color: #198754;
+        border-color: #198754;
+        color: #fff;
+    }
+
+    .btn-danger {
+        background-color: #004085; 
+        border-color: #004085;
+        color: #fff;
+    }
+
+    .btn-danger:hover, .btn-success:hover {
+        background-color: #003366; 
+        border-color: #003366;
+    }
+
+
+    .modal-content {
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+        background-color: #0056b3; 
+        color: #fff;
+        border-bottom: none;
+        padding: 15px;
+    }
+
+    .modal-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .modal-footer {
+        background-color: #f1f8ff; 
+        border-top: none;
+    }
+
+    textarea.form-control {
+        resize: none; 
+    }
+
+
+</style>
+

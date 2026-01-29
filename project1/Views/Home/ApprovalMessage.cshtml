@@ -1,0 +1,67 @@
+﻿@{
+    ViewBag.Title = "پیغام تأیید";
+}
+
+<div class="approval-container">
+    <div class="approval-box">
+        <h2>@ViewBag.Message</h2>
+        <p>منتظر تأیید از سوی کتابدار باشید.</p>
+        <a href="/Home/Index" class="approval-button">بازگشت به صفحه اصلی</a>
+    </div>
+</div>
+<style>
+
+    body {
+        background-color: #e6f2ff; 
+        margin: 0;
+        padding: 0;
+    }
+
+
+    .approval-container {
+        text-align: center;
+        margin-top: 50px;
+    }
+
+
+    .approval-box {
+        padding: 30px;
+        border: 1px solid #007BFF;
+        border-radius: 12px;
+        display: inline-block;
+        background-color: #ffffff; 
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+
+    .approval-box h2 {
+        color: #007BFF;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+
+    .approval-box p {
+        margin: 10px 0;
+        color: #555;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+
+    .approval-button {
+        text-decoration: none;
+        color: white;
+        background-color: #007BFF;
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-size: 16px;
+        display: inline-block;
+        transition: background-color 0.3s;
+    }
+
+}
+
+</style>

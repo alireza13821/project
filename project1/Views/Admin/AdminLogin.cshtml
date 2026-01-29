@@ -1,0 +1,157 @@
+﻿@model project1.Models.AdminLoginViewModel
+
+@{
+    ViewData["Title"] = "ورود مدیر";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #fafafa, #e3f2fd);
+
+    }
+
+    h1, h4 {
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+        color: #1565c0; 
+        font-size: 2.5rem;
+    }
+
+    h4 {
+        color: #0d47a1;
+    }
+
+    .card {
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); 
+    }
+
+    .card-header {
+        background-color: #1565c0;
+        color: white;
+        font-weight: bold;
+        font-size: 1.5rem;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .form-label {
+        color: #0d47a1; 
+        font-weight: bold;
+    }
+
+    .form-control {
+        background-color: #f9f9f9; 
+        border: 1px solid #ddd; 
+        border-radius: 5px;
+        padding: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #1565c0; 
+        box-shadow: 0 0 5px rgba(21, 101, 192, 0.3);
+    }
+
+    .btn-primary {
+        background-color: #1565c0;
+        border-color: #1565c0;
+        color: white;
+        transition: all 0.3s ease;
+        border-radius: 5px;
+    }
+
+    .btn-primary:hover {
+        background-color: #0d47a1; 
+        transform: scale(1.05);
+    }
+
+    .form-check-label {
+        color: #6c757d;
+    }
+
+    .card-footer a {
+        color: #1565c0;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .card-footer a:hover {
+        color: #0d47a1; 
+    }
+</style>
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">@ViewData["Title"]</h1>
+    <h4 class="text-center mb-3">ورود مدیر سیستم:</h4>
+    <hr class="mb-5" />
+
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg p-4 border-0">
+                <div class="card-header text-center">
+                    ورود مدیر
+                </div>
+                <div class="card-body">
+                    <form asp-action="AdminLogin" class="needs-validation" novalidate>
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <!-- Email Field -->
+                        <div class="form-group mb-3">
+                            <label asp-for="Email" class="form-label">ایمیل:</label>
+                            <input asp-for="Email" class="form-control" placeholder="ایمیل مدیر را وارد کنید" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="form-group mb-3">
+                            <label asp-for="Password" class="form-label">رمز عبور:</label>
+                            <input asp-for="Password" type="password" class="form-control" placeholder="رمز عبور مدیر را وارد کنید" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <!-- Remember Me Checkbox -->
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" asp-for="RememberMe" />
+                            <label class="form-check-label">
+                                مرا به خاطر بسپار
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-block">ورود</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <a asp-action="Index">بازگشت به صفحه اصلی</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        (function () {
+            'use strict'
+
+            var forms = document.querySelectorAll('.needs-validation')
+
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })();
+    </script>
+}

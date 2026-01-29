@@ -1,0 +1,95 @@
+﻿@model project1.Models.AddBookViewModel
+
+@{
+    ViewData["Title"] = "Add Book";
+}
+
+<h1 class="text-center text-primary my-4">اضافه کردن کتاب جدید</h1>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-lg">
+            <div class="card-body">
+                <h4 class="card-title text-center text-secondary">اطلاعات کتاب</h4>
+                <hr />
+                <form asp-action="AddBook" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="form-group my-3">
+                        <label asp-for="Name" class="form-label text-dark">نام کتاب</label>
+                        <input asp-for="Name" class="form-control border-primary shadow-sm" placeholder="نام کتاب را وارد کنید" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group my-3">
+                        <label asp-for="Description" class="form-label text-dark">توضیحات کتاب</label>
+                        <textarea asp-for="Description" class="form-control border-primary shadow-sm" rows="3" placeholder="توضیحات کوتاه درباره کتاب"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group my-3">
+                        <label asp-for="Quantity" class="form-label text-dark">تعداد کتاب</label>
+                        <input asp-for="Quantity" class="form-control border-primary shadow-sm" type="number" min="1" placeholder="تعداد موجودی کتاب را وارد کنید" />
+                        <span asp-validation-for="Quantity" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group my-3">
+                        <label asp-for="picture" class="form-label text-dark">بارگزاری تصویر کتاب</label>
+                        <input asp-for="picture" class="form-control border-primary shadow-sm" type="file" />
+                        <span asp-validation-for="picture" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group text-center mt-4">
+                        <button type="submit" class="btn btn-primary px-4 py-2 shadow">ایجاد</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2 shadow ms-3">بازگشت به صفحه اصلی</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+<style>
+    body {
+        background-color: #e7f3ff; 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .card {
+        background-color: #ffffff;
+        border-radius: 10px;
+        border: none;
+    }
+    .card-title {
+        font-weight: bold;
+    }
+    h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    .btn-outline-secondary {
+        border-color: #6c757d;
+        color: #6c757d;
+    }
+    .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        color: #fff;
+    }
+    input, textarea {
+        transition: all 0.3s ease-in-out;
+    }
+    input:focus, textarea:focus {
+        outline: none;
+        box-shadow: 0px 0px 8px #007bff;
+    }
+</style>

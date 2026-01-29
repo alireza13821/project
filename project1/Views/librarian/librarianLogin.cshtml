@@ -1,0 +1,146 @@
+﻿@model project1.Models.librarianLoginViewModel
+
+@{
+    ViewData["Title"] = "ورود کتابدار";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #fafafa, #e3f2fd);
+        font-family: Arial, sans-serif;
+    }
+
+    h1 {
+        color: #1565c0;
+        font-size: 2.5rem;
+        text-align: center;
+        margin-top: 50px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    h4 {
+        color: #3949ab;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .form-group label {
+        color: #1565c0;
+        font-weight: bold;
+    }
+
+    .form-control {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #1565c0;
+        box-shadow: 0 0 5px rgba(30, 136, 229, 0.3);
+    }
+
+    .btn-primary {
+        background-color: #1565c0;
+        border-color: #1565c0;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        font-size: 1rem;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #0d47a1;
+        transform: scale(1.05);
+    }
+
+    .form-check-label {
+        color: #6c757d;
+    }
+
+    .card {
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        padding: 30px;
+        margin-top: 50px;
+    }
+
+    .card-header {
+        background-color: #1565c0;
+        color: white;
+        font-weight: bold;
+        font-size: 1.5rem;
+        text-align: center;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .text-danger {
+        color: #d32f2f;
+    }
+
+    a {
+        color: #1565c0;
+        text-decoration: none;
+    }
+
+    a:hover {
+        color: #0d47a1;
+    }
+</style>
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    ورود کتابدار
+                </div>
+                <div class="card-body">
+                    <form asp-action="librarianLogin">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <!-- Email Field -->
+                        <div class="form-group mb-3">
+                            <label asp-for="Email" class="control-label">ایمیل:</label>
+                            <input asp-for="Email" class="form-control" placeholder="ایمیل خود را وارد کنید" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="form-group mb-3">
+                            <label asp-for="Password" class="control-label">رمز عبور:</label>
+                            <input asp-for="Password" type="password" class="form-control" placeholder="رمز عبور خود را وارد کنید" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <!-- Remember Me -->
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" asp-for="RememberMe" />
+                            <label class="form-check-label">
+                                مرا به خاطر بسپار
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary">ورود</button>
+                    </form>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <a asp-action="Index">بازگشت به صفحه اصلی</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
