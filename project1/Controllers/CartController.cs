@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace project1.Controllers
 {
-    [Authorize(Roles = "User")]
+    [Authorize(policy: "User")]
     public class CartController : Controller
     {
         private readonly MyDbContext _dbcontext;
@@ -28,7 +28,10 @@ namespace project1.Controllers
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Book)
                 .FirstOrDefault(o => o.UserId == userId && !o.IsPaid);
-
+            var user = _dbcontext.Users.Find(userId);
+            ViewBag.IsBlocked = user?.IsBlocked ?? false;
+            ViewBag.TotalFine = user?.TotalFineAmount ?? 0;
+            ViewBag.IsPremium = user?.IsPremium ?? false;
             return View(order);
         }
 
@@ -38,18 +41,14 @@ namespace project1.Controllers
         public IActionResult AddToCart(int bookId)
         {
             int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
             var user = _dbcontext.Users.First(u => u.Id == userId);
-
+            
             var book = _dbcontext.Books
                 .FirstOrDefault(b => b.Id == bookId && b.Type == BookType.Sale && b.IsActive);
-
             if (book == null)
                 return NotFound();
-
             var order = _dbcontext.Orders
                 .FirstOrDefault(o => o.UserId == userId && !o.IsPaid);
-
             if (order == null)
             {
                 order = new Order
@@ -64,15 +63,14 @@ namespace project1.Controllers
 
             var item = _dbcontext.OrderItems
                 .FirstOrDefault(i => i.OrderId == order.Id && i.BookId == bookId);
-
             if (book.AvailableQuantity < 1)
                 return BadRequest("موجودی کافی نیست");
-
             // 💰 قیمت با تخفیف اگر پریمیوم بود
             float finalPrice = book.Price;
             if (user.IsPremium)
+            {
                 finalPrice *= 0.8f; // 20٪ تخفیف
-
+            }
             if (item == null)
             {
                 item = new OrderItem
@@ -91,14 +89,11 @@ namespace project1.Controllers
 
                 item.Quantity++;
             }
-
             // 🔥 محاسبه صحیح جمع کل
             order.TotalPrice = _dbcontext.OrderItems
                 .Where(i => i.OrderId == order.Id)
                 .Sum(i => i.Quantity * i.Price);
-
             _dbcontext.SaveChanges();
-
             return RedirectToAction("Index");
         }
 
@@ -107,21 +102,16 @@ namespace project1.Controllers
             var item = _dbcontext.OrderItems
                 .Include(i => i.Order)
                 .FirstOrDefault(i => i.Id == itemId);
-
             if (item == null)
                 return NotFound();
-
             var order = item.Order;
-
             _dbcontext.OrderItems.Remove(item);
             _dbcontext.SaveChanges();
 
             order.TotalPrice = _dbcontext.OrderItems
                 .Where(i => i.OrderId == order.Id)
                 .Sum(i => i.Quantity * i.Price);
-
             _dbcontext.SaveChanges();
-
             return RedirectToAction("Index");
         }
 
@@ -129,15 +119,12 @@ namespace project1.Controllers
         public IActionResult Checkout()
         {
             int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
             var order = _dbcontext.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Book)
                 .FirstOrDefault(o => o.UserId == userId && !o.IsPaid);
-
             if (order == null || !order.OrderItems.Any())
                 return BadRequest("سبد خرید خالی است");
-
             foreach (var item in order.OrderItems)
             {
                 if (item.Book.AvailableQuantity < item.Quantity)
@@ -145,15 +132,11 @@ namespace project1.Controllers
 
                 item.Book.AvailableQuantity -= item.Quantity;
             }
-
             order.TotalPrice = order.OrderItems
                 .Sum(i => i.Quantity * i.Price);
-
             order.IsPaid = true;
             order.OrderDate = DateTime.Now;
-
             _dbcontext.SaveChanges();
-
             return RedirectToAction("MyOrders", "Profile");
         }
     }

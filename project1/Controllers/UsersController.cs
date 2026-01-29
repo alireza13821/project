@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +19,7 @@ namespace project1.Controllers
             _dbcontext = context;
         }
 
-        [Authorize(policy: "Admin")]
+        [Authorize(policy: "Librarian")]
         public IActionResult Index()
         {
             return View(_dbcontext.Users.ToList());
@@ -45,19 +45,15 @@ namespace project1.Controllers
         public IActionResult Subscription()
         {
             int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
             var activeSubscription = _dbcontext.Subscriptions
                 .FirstOrDefault(s => s.UserId == userId && s.IsActive);
-
             SubscriptionViewModel vm = new SubscriptionViewModel();
-
             if (activeSubscription != null)
             {
                 vm.HasActiveSubscription = true;
                 vm.ExpireDate = activeSubscription.EndDate;
                 vm.RemainingDays = (activeSubscription.EndDate - DateTime.Now).Days;
             }
-
             return View(vm);
         }
 
@@ -65,19 +61,14 @@ namespace project1.Controllers
         public IActionResult BuySubscription()
         {
             int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
             var user = _dbcontext.Users.Find(userId);
-
             if (user == null)
                 return RedirectToAction("Subscription");
-
             var oldSubscriptions = _dbcontext.Subscriptions
                 .Where(s => s.UserId == userId && s.IsActive)
                 .ToList();
-
             foreach (var sub in oldSubscriptions)
                 sub.IsActive = false;
-
             var newSubscription = new Subscription
             {
                 UserId = userId,
@@ -86,14 +77,11 @@ namespace project1.Controllers
                 Price = 800000,
                 IsActive = true
             };
-
             user.IsPremium = true;
 
             _dbcontext.Subscriptions.Add(newSubscription);
             _dbcontext.SaveChanges();
-
-            TempData["SuccessMessage"] = "????? ????? ?????? ??? ?? ?????? ???? ??!";
-
+            TempData["SuccessMessage"] = "کاربر گرامی اشتراک شما با موفقیت فعال شد!";
             return RedirectToAction("Subscription");
         }
     }

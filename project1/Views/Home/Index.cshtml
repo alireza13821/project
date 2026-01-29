@@ -46,7 +46,7 @@
                                     asp-controller="Cart"
                                     asp-route-bookId="@book.Id"
                                     class="btn btn-success">
-                                    افزودن به سبد
+                                    افزودن به سبد خرید
                                     </a>
                                 }
                                 else
@@ -66,7 +66,7 @@
                               method="post">
                                         <input type="hidden" name="bookId" value="@book.Id" />
                                         <button class="btn btn-primary">
-                                            امانت گرفتن
+                                            امانت
                                         </button>
                                     </form>
                                 }
@@ -81,7 +81,7 @@
                                             method="post">
                                             <input type="hidden" name="bookId" value="@book.Id" />
                                             <button class="btn btn-warning">
-                                                افزودن به رزرو
+                                                رزرو
                                             </button>
                                         </form>
                                     }

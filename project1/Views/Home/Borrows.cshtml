@@ -3,6 +3,18 @@
     var activeBorrows = ViewBag.ActiveBorrows as List<Borrow>;
 }
 
+@if (ViewBag.IsBlocked == true)
+{
+    <div class="text-center alert alert-danger">
+        ❌ حساب شما به دلیل بدهی
+        <strong>@ViewBag.TotalFine</strong>
+        هزار تومان مسدود شده است. لطفاً ابتدا بدهی خود را تسویه کنید.
+    </div>
+    <a asp-controller="Payment" asp-action="Pay" asp-route-type="Fine"
+       class="btn btn-danger">پرداخت بدهی
+    </a>
+}
+else{
 <h2>📚 امانت‌های در انتظار ثبت</h2>
 
 @if (!Model.Any())
@@ -21,16 +33,26 @@ else
             <tr>
                 <td>@book.Name</td>
                 <td>
-                    <a asp-action="RemoveBorrow"
-               asp-route-bookId="@book.Id"
-               class="btn btn-danger btn-sm">
-                        حذف
-                    </a>
+                    <form asp-action="RemoveFromBorrow"
+                          method="post"
+                          style="display:inline;">
+                        <input type="hidden" name="bookId" value="@book.Id" />
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            حذف
+                        </button>
+                    </form>
+
                 </td>
             </tr>
         }
     </table>
-
+        @if (ViewBag.IsPremium == true)
+        {
+            <div class="text-center alert alert-success">
+                کاربر گرامی به دلیل داشتن اشتراک فعال، برای امانت اولیه
+                به جای دو هفته، می‌توانید به مدت یک ماه کتاب مدنظر خود را امانت بگیرید!
+            </div>
+        }
     <form asp-action="ConfirmBorrows" method="post">
         <button class="btn btn-success">
             ثبت نهایی امانت
@@ -63,8 +85,7 @@ else
                     @if (b.RenewedCount < 2)
                     {
                         <a asp-action="RenewBorrow"
-               asp-route-id="@b.Id"
-               class="btn btn-warning btn-sm">
+                        asp-route-id="@b.Id" class="btn btn-warning btn-sm">
                             تمدید
                         </a>
                     }
@@ -72,6 +93,7 @@ else
             </tr>
         }
     </table>
+}
 }
 <a asp-action="Reserves"
    asp-controller="Home"

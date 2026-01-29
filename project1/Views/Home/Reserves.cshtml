@@ -1,5 +1,15 @@
 ﻿@model List<Reserve>
 
+@if (ViewBag.IsBlocked == true)
+{
+    <div class="text-center alert alert-warning">
+        ⛔ به دلیل بدهی، امکان ثبت رزرو جدید ندارید. لطفاً ابتدا بدهی خود را تسویه کنید
+    </div>
+    <a asp-controller="Payment" asp-action="Pay" asp-route-type="Fine"
+       class="btn btn-danger">پرداخت بدهی
+    </a>
+}
+else{
 <h2>📌 رزروهای فعال من</h2>
 
 @if (!Model.Any())
@@ -31,4 +41,5 @@ else
                     </tr>
         }
         </table>
+}
 }

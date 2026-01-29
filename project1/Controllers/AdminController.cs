@@ -30,21 +30,17 @@ namespace project1.Controllers
                 .Where(o => o.IsPaid)
                 .Include(o => o.User)
                 .ToList();
-
             var subscriptions = _dbcontext.Subscriptions
                 .Include(s => s.User)
                 .ToList();
-
             var paidFines = _dbcontext.Fines
                 .Where(f => f.IsPaid)
                 .Include(f => f.User)
                 .ToList();
-
             var unpaidFines = _dbcontext.Fines
                 .Where(f => !f.IsPaid)
                 .Include(f => f.User)
                 .ToList();
-
             var viewModel = new FinancialReportViewModel
             {
                 BookOrders = bookOrders,
@@ -57,7 +53,6 @@ namespace project1.Controllers
                 TotalPaidFines = paidFines.Sum(f => f.Amount),
                 TotalUnpaidFines = unpaidFines.Sum(f => f.Amount)
             };
-
             return View(viewModel);
         }
 
@@ -67,35 +62,29 @@ namespace project1.Controllers
         {
             if (string.IsNullOrWhiteSpace(q))
                 return View(new List<Book>());
-
             q = q.Trim();
-
             var books = _dbcontext.Books
                 .Where(b =>
                     b.Name.Contains(q) ||
-                    b.Author.Contains(q)).ToList();
-
+                    b.Author.Contains(q))
+                .ToList();
             return View(books);
         }
 
-
         // 🔍 سرچ کاربران (GET – مخصوص Enter و URL)
-        [HttpGet]
+        [AllowAnonymous]   
         public IActionResult SearchUser(string search)
         {
             if (string.IsNullOrWhiteSpace(search))
                 return View(new List<User>());
-
             search = search.Trim();
-
             var users = _dbcontext.Users
                 .Where(u => (u.Role == "User" || u.Role == "Librarian")&&
                     (u.Name.Contains(search) ||
-                     u.Email.Contains(search))).ToList();
-
+                     u.Email.Contains(search)))
+                .ToList();
             return View(users);
         }
-
 
         // ➕ افزودن کتاب
         public IActionResult AddBook()
@@ -108,7 +97,6 @@ namespace project1.Controllers
         {
             if (!ModelState.IsValid)
                 return View(model);
-
             var book = new Book
             {
                 Name = model.Name!,
@@ -121,10 +109,8 @@ namespace project1.Controllers
                 Price = model.Price,
                 IsActive = true
             };
-
             _dbcontext.Books.Add(book);
             _dbcontext.SaveChanges();
-
             if (model.Picture?.Length > 0)
             {
                 var filePath = Path.Combine(
@@ -135,7 +121,6 @@ namespace project1.Controllers
                 using var stream = new FileStream(filePath, FileMode.Create);
                 model.Picture.CopyTo(stream);
             }
-
             return RedirectToAction("Index");
         }
 
@@ -156,7 +141,6 @@ namespace project1.Controllers
                 PublishedYear = book.PublishedYear,
                 Price = book.Price
             };
-
             return View(model);
         }
 
@@ -185,11 +169,9 @@ namespace project1.Controllers
                     Directory.GetCurrentDirectory(),
                     "wwwroot", "img",
                     model.Id + Path.GetExtension(model.Picture.FileName));
-
                 using var stream = new FileStream(filePath, FileMode.Create);
                 model.Picture.CopyTo(stream);
             }
-
             return RedirectToAction("Index");
         }
     }

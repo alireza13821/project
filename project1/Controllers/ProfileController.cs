@@ -26,21 +26,18 @@ namespace project1.Controllers
         public IActionResult MyOrders()
         {
             int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
             var orders = _dbcontext.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Book)
                 .Where(o => o.UserId == userId && o.IsPaid)
                 .OrderByDescending(o => o.OrderDate)
                 .ToList();
-
             return View(orders);
         }
         [HttpPost]
         public IActionResult Update(User model)
         {
             var user = _dbcontext.Users.Find(model.Id);
-
             user!.Name = model.Name;
             user.Email = model.Email;
             user.Password = model.Password;

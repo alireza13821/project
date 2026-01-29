@@ -35,31 +35,54 @@ else
             <input asp-for="Phone" class="form-control" />
         </div>
 
-        <div class="mb-2">
+        <div class="mb-3">
             <label>تاریخ ثبت‌نام</label>
             <input asp-for="RegisterDate" class="form-control" readonly />
         </div>
 
-        @* <div class="mb-2">
-            <label>وضعیت اشتراک</label>
-            <input asp-for="IsPremium" class="form-control" readonly />
-        </div>
+        
+        @if (Model.Role == "User" && Model.IsPremium)
+        {
+            <div class="mb-2">
+                <label>عضو محترم، شما اشتراک فعال</label>
+                <span style="color: darkorchid; font-weight: bold;">دارید🙂</span>
+            </div>
+        }
+        @if (Model.Role == "User" && !(Model.IsPremium))
+        {
+            <div class="mb-2">
+                <label>عضو محترم، شما اشتراک فعال</label>
+                <span style="color: darkorchid; font-weight: bold;">ندارید!</span>
+            </div>
+        }
 
-        <div class="mb-2">
-            <label>مسدود شده(True)/نشده(False)</label>
-            <input asp-for="IsBlocked" class="form-control" readonly />
-        </div> *@
+        @if (Model.Role == "User" && Model.IsBlocked)
+        {
+            <div class="mb-2">
+                <label>عضو محترم، شما</label>
+                <span style="color: darkorchid; font-weight: bold;">مسدود شده‌اید!</span>
+            </div>
+        }
+        @if (Model.Role == "User" && !(Model.IsBlocked))
+        {
+            <div class="mb-2">
+                <label>عضو محترم، شما</label>
+                <span style="color: darkorchid; font-weight: bold;">کاربر فعال می‌باشید🙂</span>
+            </div>
+        }
+        @* @if (Model.Role != "User")
+        {
+            <span>-</span>
+        } *@
 
+    @if (Model.Role == "User")
+    {
         <div class="mb-2">
             <label>مقدار بدهکاری</label>
             <input asp-for="TotalFineAmount" class="form-control" readonly/>
         </div>
-
+    }
         <button class="btn btn-success">ذخیره</button>
-       @*  <a asp-action="MyOrders"
-       class="btn btn-outline-primary ">
-            📦 مشاهده تاریخچه خریدها
-        </a> *@
     </form>
 }
 

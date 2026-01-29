@@ -1,5 +1,18 @@
 ﻿@model Order
 
+@if (ViewBag.IsBlocked == true)
+{
+    <div class="text-center alert alert-danger">
+        ❌ به دلیل بدهی
+        <strong>@ViewBag.TotalFine</strong>
+        هزار تومان، امکان خرید ندارید.لطفاً ابتدا بدهی خود را تسویه کنید.
+    </div>
+    <a asp-controller="Payment" asp-action="Pay" asp-route-type="Fine"
+       class="btn btn-danger">
+        پرداخت بدهی
+    </a>
+}
+else{
 <h2 class="mb-4">🛒 سبد خرید</h2>
 
 @if (Model == null || Model.OrderItems == null || !Model.OrderItems.Any())
@@ -40,7 +53,13 @@ else
             }
         </tbody>
     </table>
-
+        @if (ViewBag.IsPremium==true)
+        {
+            <div class="text-center alert alert-success">
+                کاربر گرامی به دلیل داشتن اشتراک فعال،
+                تخفیف 20 درصدی بر سبد خرید شما اعمال شده است!
+            </div>
+        }
     <h4>
         جمع کل:
         @Model.OrderItems.Sum(i => i.Quantity * i.Price) تومان
@@ -48,13 +67,13 @@ else
 
     @if (User.IsInRole("User") && ViewBag.IsPremium == true)
     {
-        <span class="badge bg-success">🎉 ۲۰٪ تخفیف اشتراک ویژه اعمال شده</span>
+        <div class="mb-1">
+        <span class="badge bg-success mb-1">🎉 ۲۰٪ تخفیف اشتراک ویژه اعمال شده</span>
+        </div>
     }
-
-
-    <form asp-action="Checkout" method="post">
-        <button class="btn btn-success">
-            تأیید نهایی خرید
-        </button>
-    </form>
+        <a asp-controller="Payment" asp-action="Pay" asp-route-type="Order"
+           asp-route-id="@Model.Id"
+           class="btn btn-success">پرداخت
+        </a>
+}
 }

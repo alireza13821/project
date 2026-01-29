@@ -17,7 +17,7 @@ namespace project1.Models
         public BookType Type { get; set; }
         public float Price { get; set; }
         public bool IsActive { get; set; }
-        public ICollection<Reserve> Reserves { get; set; }
+        public ICollection<Reserve>? Reserves { get; set; }
 
     }
     public enum BookType

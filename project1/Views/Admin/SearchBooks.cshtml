@@ -17,7 +17,7 @@
             <div class="col-md-2 mb-3 ">
                 <div class="card p-2 align-items-center">
                     <img src="/img/@(book.Id).jpg"
-                 style="width:60px;height:90px;object-fit:cover" />
+                    style="width:60px;height:90px;object-fit:cover" />
                     <h5 class="text-center">@book.Name</h5>
                     <p class="text-center">@book.Author</p>
                     @if (book.Type.ToString() == "Sale")
@@ -28,8 +28,9 @@
                     @if (book.Type.ToString() == "Borrow")
                     {
                         <p class="text-center" style="color: lightseagreen;
-                                    font-weight: bold;">امانتی</p>
+                        font-weight: bold;">امانتی</p>
                     }
+                    <a class="btn btn-sm btn-warning" href="/Admin/EditBook/@book.Id">ویرایش</a>
                 </div>
             </div>
         }

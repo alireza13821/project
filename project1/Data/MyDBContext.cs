@@ -37,19 +37,6 @@ namespace project1.Data
                 .WithMany()
                 .HasForeignKey(f => f.BorrowId)
                 .OnDelete(DeleteBehavior.NoAction);
-
-            //// (اگر ChatMessage هم داری، اینا هم باید باشن)
-            //modelBuilder.Entity<Message>()
-            //    .HasOne(c => c.Sender)
-            //    .WithMany()
-            //    .HasForeignKey(c => c.SenderId)
-            //    .OnDelete(DeleteBehavior.NoAction);
-
-            //modelBuilder.Entity<Message>()
-            //    .HasOne(c => c.Receiver)
-            //    .WithMany()
-            //    .HasForeignKey(c => c.ReceiverId)
-            //    .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

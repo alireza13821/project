@@ -1,0 +1,57 @@
+﻿@model PaymentViewModel
+
+<h2 class="text-center">@Model.Title</h2>
+
+<form method="post">
+    <div class="mb-2">
+        <label>پذیرنده</label>
+        <input class="form-control" value="@Model.Receiver" readonly />
+    </div>
+
+    <div class="mb-2">
+        <p class="alert alert-info">
+            مبلغ قابل پرداخت:
+            <strong>@Model.Amount.ToString("N0") تومان</strong>
+        </p>
+    </div>
+
+    <div class="mb-2">
+        <label>شماره کارت</label>
+        <input asp-for="CardNumber" class="form-control" />
+    </div>
+
+    <div class="mb-2">
+        <label>شماره شناسایی دوم(CVV2)</label>
+        <input asp-for="CVV2" placeholder="CVV2" class="form-control" />
+    </div>
+
+    <div class="row mb-2">
+        <label class="mb-1 w-100">تاریخ انقضا</label>
+        <div class="col">
+            <input asp-for="ExpireMonth" placeholder="ماه" class="form-control" />
+        </div>
+        <div class="col">
+            <input asp-for="ExpireYear" placeholder="سال" class="form-control" />
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <p class="alert alert-info">
+            کد امنیتی: <strong>@Model.SecurityCode</strong>
+        </p>
+        <input asp-for="SecurityCode" placeholder="کد امنیتی" class="form-control" />
+    </div>
+
+    <input type="hidden" asp-for="PaymentType" />
+    <input type="hidden" asp-for="RefId" />
+
+    <div class="mb-2">
+    <button class="btn btn-success w-100">پرداخت @Model.Amount تومان</button>
+    </div>
+
+    <div>
+        <a asp-controller="Cart" asp-action="Index" 
+           class="btn btn-danger w-100">انصراف
+        </a>
+    </div>
+</form>

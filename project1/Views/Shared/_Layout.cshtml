@@ -44,19 +44,21 @@
 
                                     @if (User.IsInRole("Admin"))
                                     {
-                                        <li><a class="dropdown-item" asp-controller="Users" asp-action="Index">مدیریت کاربران</a></li>
-                                    
                                         <li>
-                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Index">
-                                                مدیریت کتاب‌ها
-                                            </a>
+                                            <a class="dropdown-item" asp-controller="Users" asp-action="Index">مدیریت کاربران</a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" asp-controller="Admin" asp-action="FinancialReport">
-                                                گزارشات مالی
-                                            </a>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Index">مدیریت کتاب‌ها</a>
                                         </li>
-    
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="FinancialReport">گزارشات مالی</a>
+                                        </li>
+                                    }
+                                    @if (User.IsInRole("Librarian"))
+                                    {
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Users" asp-action="Index">کاربران</a>
+                                        </li>
                                     }
                                     @if (User.IsInRole("User"))
                                     {
@@ -79,7 +81,7 @@
                             {
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Chat" asp-action="Inbox">
-                                        💬 پیام‌ها
+                                        💬 صندوق پیام‌ها
                                     </a>
                                 </li>
                             }

@@ -78,12 +78,7 @@ namespace project1.Controllers
             if (!Regex.IsMatch(phone, @"^\d+$"))
             {
                 return Json("شماره همراه باید فقط شامل رقم باشد");
-            }
-            // بررسی فرمت صحیح (اختیاری)
-            //if (!Regex.IsMatch(phone, @"^09[0-9]{9}$"))
-            //{
-            //    return Json("فرمت شماره همراه صحیح نمی‌باشد");
-            //}
+            }        
             return Json(true);
         }
 
@@ -129,7 +124,6 @@ namespace project1.Controllers
                     var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var principal = new ClaimsPrincipal(identity);
                     HttpContext.SignInAsync(principal);
-
                     return RedirectToAction("Index", "Home");
                 }
             }
@@ -143,7 +137,6 @@ namespace project1.Controllers
             }
             return Json("ایمیل نادرست وارد شده است!");
         }
-
         public IActionResult Logout()
         {
             HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -158,9 +151,8 @@ namespace project1.Controllers
                 .Where(u =>
                     u.Name.Contains(q) ||
                     u.Email.Contains(q) ||
-                    u.Phone.Contains(q))
+                    u.Phone!.Contains(q))
                 .ToList();
-
             return View(users);
         }
         public IActionResult UserList()
@@ -176,7 +168,6 @@ namespace project1.Controllers
             var user = _dbcontext.Users.FirstOrDefault(u => u.Id == id);
             if (user == null) return NotFound();
             return View("~/Views/Account/EditUser.cshtml", user);
-
         }
         // ذخیره تغییرات کاربر
         [HttpPost]
@@ -185,7 +176,6 @@ namespace project1.Controllers
         public IActionResult EditUser(int id, project1.Models.User model)
         {
             if (id != model.Id) return BadRequest();
-
             var user = _dbcontext.Users.FirstOrDefault(u => u.Id == id);
             if (user == null) return NotFound();
 
